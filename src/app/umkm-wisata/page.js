@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ShoppingBag, Compass, MapPin, Phone, MessageSquare, ExternalLink } from "lucide-react";
 import { umkmData, wisataData } from "@/data/umkmWisataData";
 
 export default function UmkmWisata() {
   const [activeTab, setActiveTab] = useState("semua"); // semua, umkm, wisata
+
+  useEffect(() => {
+    document.title = "Potensi Wisata & UMKM - Portal Desa Tempursari";
+  }, []);
+
 
   const handleWaContact = (umkm) => {
     const cleanPhone = umkm.kontak.replace("+", "");

@@ -1,10 +1,14 @@
-"use client";
-
 import Image from "next/image";
 import { Music, Calendar, MapPin, Sparkles } from "lucide-react";
 import { kesenianData } from "@/data/umkmWisataData";
 
+export const metadata = {
+  title: "Kesenian & Budaya - Portal Desa Tempursari",
+  description: "Daftar warisan adat kebudayaan dan kesenian tradisional khas Desa Tempursari.",
+};
+
 export default function KesenianDaerah() {
+
   return (
     <div className="pt-28 pb-20 bg-slate-50 min-h-screen">
       {/* Page Header Banner */}

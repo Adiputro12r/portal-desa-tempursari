@@ -1,10 +1,14 @@
-"use client";
-
 import Image from "next/image";
 import { Landmark, ShieldCheck } from "lucide-react";
 import { lembagaData } from "@/data/demografiData";
 
+export const metadata = {
+  title: "Lembaga Desa - Portal Desa Tempursari",
+  description: "Daftar lembaga kemasyarakatan resmi Desa Tempursari seperti PKK, LPMD, dan Karang Taruna.",
+};
+
 export default function LembagaDesa() {
+
   return (
     <div className="pt-28 pb-20 bg-slate-50 min-h-screen">
       {/* Page Header Banner */}

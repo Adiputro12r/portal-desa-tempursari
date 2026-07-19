@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Compass, AlertTriangle } from "lucide-react";
 
@@ -18,6 +19,10 @@ const VillageMap = dynamic(
 );
 
 export default function PetaInteraktif() {
+  useEffect(() => {
+    document.title = "Peta Interaktif - Portal Desa Tempursari";
+  }, []);
+
   return (
     <div className="pt-28 pb-20 bg-slate-50 min-h-screen">
       {/* Page Header Banner */}

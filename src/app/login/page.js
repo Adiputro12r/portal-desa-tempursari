@@ -12,9 +12,9 @@ export default function LoginAdmin() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-
   // If already logged in, redirect straight to admin dashboard
   useEffect(() => {
+    document.title = "Login Admin - Portal Desa Tempursari";
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -23,6 +23,7 @@ export default function LoginAdmin() {
     };
     checkSession();
   }, [router]);
+
 
   const handleLogin = async (e) => {
     e.preventDefault();

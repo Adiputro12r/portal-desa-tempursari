@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+
 import Image from "next/image";
 import { BookOpen, Calendar, Search, Newspaper } from "lucide-react";
 import { beritaData } from "@/data/beritaData";
@@ -10,7 +11,12 @@ export default function KabarDesa() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
 
+  useEffect(() => {
+    document.title = "Kabar Desa - Portal Desa Tempursari";
+  }, []);
+
   const categories = ["Semua", "Kegiatan", "Pembangunan", "Kesenian & Budaya"];
+
 
   const filteredBerita = beritaData.filter((berita) => {
     const matchesSearch =

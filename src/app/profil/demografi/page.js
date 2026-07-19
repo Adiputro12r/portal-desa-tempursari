@@ -10,7 +10,9 @@ export default function DemografiPenduduk() {
 
   useEffect(() => {
     setMounted(true);
+    document.title = "Demografi Kependudukan - Portal Desa Tempursari";
   }, []);
+
 
   // Palette colors for Pie Cells
   const COLORS = ["#047857", "#059669", "#10b981", "#34d399", "#a7f3d0", "#d1fae5"];

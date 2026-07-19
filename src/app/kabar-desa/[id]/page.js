@@ -1,11 +1,11 @@
 "use client";
 
-import { use } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
+
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Calendar, User, ChevronRight, Share2, Clipboard, Check } from "lucide-react";
-import { useState } from "react";
 import { beritaData } from "@/data/beritaData";
 
 export default function DetailBerita({ params }) {
@@ -16,6 +16,13 @@ export default function DetailBerita({ params }) {
   const [copied, setCopied] = useState(false);
 
   const artikel = beritaData.find((b) => b.id === id);
+
+  useEffect(() => {
+    if (artikel) {
+      document.title = `${artikel.judul} - Portal Desa Tempursari`;
+    }
+  }, [artikel]);
+
 
   // Fallback if article not found
   if (!artikel) {

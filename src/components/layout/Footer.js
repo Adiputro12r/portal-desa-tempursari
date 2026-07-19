@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, Phone, MapPin, Heart } from "lucide-react";
+import { Mail, Phone, MapPin, Heart, Lock } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -45,11 +45,8 @@ export default function Footer() {
               <li>
                 <Link href="/profil/demografi" className="hover:text-emerald-400 transition-colors">Demografi</Link>
               </li>
-              <li>
+              <li className="col-span-2">
                 <Link href="/peta" className="hover:text-emerald-400 transition-colors font-bold text-emerald-500">Peta Interaktif</Link>
-              </li>
-              <li>
-                <Link href="/login" className="hover:text-emerald-400 transition-colors">Login Admin</Link>
               </li>
             </ul>
           </div>
@@ -80,16 +77,24 @@ export default function Footer() {
       <div className="bg-slate-900/60 py-6 border-t border-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold">
           <p>© 2026 Pemerintah Desa Tempursari. Seluruh hak cipta dilindungi.</p>
-          <div className="flex items-center space-x-1 text-slate-400">
+          <div className="flex items-center space-x-1.5 text-slate-400">
             <span>Dibuat dengan</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
             <span>oleh</span>
             <span className="text-emerald-400 font-bold hover:underline cursor-pointer">
               Tim KKN Desa Tempursari 2026
             </span>
+            <Link 
+              href="/login" 
+              className="p-1 hover:bg-slate-800 rounded text-slate-700 hover:text-slate-500 transition-all ml-1.5" 
+              title="Admin Portal"
+            >
+              <Lock className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       </div>
     </footer>
   );
 }
+
