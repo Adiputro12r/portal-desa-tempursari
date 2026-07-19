@@ -1,0 +1,127 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dusun Sabrang Kidul",
+        "type": "dusun",
+        "area_ha": 45.2,
+        "population": 850,
+        "fillColor": "#22c55e"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [110.300, -7.650],
+            [110.315, -7.650],
+            [110.315, -7.660],
+            [110.300, -7.660],
+            [110.300, -7.650]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dusun Limbangan",
+        "type": "dusun",
+        "area_ha": 52.8,
+        "population": 945,
+        "fillColor": "#eab308"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [110.315, -7.650],
+            [110.330, -7.650],
+            [110.330, -7.660],
+            [110.315, -7.660],
+            [110.315, -7.650]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kantor Kepala Desa Tempursari",
+        "type": "fasum",
+        "category": "Pemerintahan",
+        "description": "Pusat pelayanan administratif dan pemerintahan Desa Tempursari."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [110.312, -7.653]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "SD Negeri 1 Tempursari",
+        "type": "fasum",
+        "category": "Pendidikan",
+        "description": "Sekolah dasar negeri utama untuk anak-anak di Desa Tempursari."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [110.308, -7.656]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Embong Air Indah Tempursari",
+        "type": "wisata",
+        "category": "Wisata Air",
+        "description": "Danau buatan yang asri, menawarkan perahu dayung dan area bersantai."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [110.305, -7.658]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hutan Pinus Lereng Bukit",
+        "type": "wisata",
+        "category": "Camping Ground",
+        "description": "Area perkemahan yang dikelilingi pohon pinus dengan udara yang sejuk."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [110.325, -7.652]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kripik Singkong Ibu Sumarni",
+        "type": "umkm",
+        "category": "Kuliner",
+        "description": "Pusat oleh-oleh kripik singkong renyah aneka rasa."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [110.309, -7.654]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Batik Tulis Pak Maryono",
+        "type": "umkm",
+        "category": "Kerajinan",
+        "description": "Sanggar produksi kerajinan batik tulis handmade khas Tempursari."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [110.320, -7.657]
+      }
+    }
+  ]
+}
