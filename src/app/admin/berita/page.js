@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Trash2, Edit3, Save, X, Calendar, Newspaper, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, Edit3, Save, X, Calendar, Newspaper, Image as ImageIcon, Upload } from "lucide-react";
 import { beritaData as initialDummyBerita } from "@/data/beritaData";
 
 export default function ManageBerita() {
@@ -17,6 +17,18 @@ export default function ManageBerita() {
   const [konten, setKonten] = useState("");
   const [kategori, setKategori] = useState("Kegiatan");
   const [fotoUrl, setFotoUrl] = useState("");
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setFotoUrl(event.target?.result || "");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   
   const fetchBerita = async () => {
     setLoading(true);
@@ -243,30 +255,50 @@ export default function ManageBerita() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase">Kategori</label>
-                  <select
-                    value={kategori}
-                    onChange={(e) => setKategori(e.target.value)}
-                    className="block w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-800 bg-white"
-                  >
-                    <option value="Kegiatan">Kegiatan</option>
-                    <option value="Pembangunan">Pembangunan</option>
-                    <option value="Kesenian & Budaya">Kesenian & Budaya</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase">Foto Sampul (Link / URL)</label>
-                  <input
-                    type="text"
-                    value={fotoUrl}
-                    onChange={(e) => setFotoUrl(e.target.value)}
-                    className="block w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-800"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase">Kategori</label>
+                <select
+                  value={kategori}
+                  onChange={(e) => setKategori(e.target.value)}
+                  className="block w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-800 bg-white"
+                >
+                  <option value="Kegiatan">Kegiatan</option>
+                  <option value="Pembangunan">Pembangunan</option>
+                  <option value="Kesenian & Budaya">Kesenian & Budaya</option>
+                </select>
               </div>
+
+              {/* Upload Foto / SVG File */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase">Upload Berkas Foto / SVG</label>
+                <div className="flex items-center space-x-2">
+                  <label className="flex-1 cursor-pointer bg-slate-50 hover:bg-emerald-50/50 border border-dashed border-emerald-500/40 rounded-xl px-3 py-2 text-center transition-colors">
+                    <span className="text-xs font-bold text-emerald-700 flex items-center justify-center space-x-1">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload SVG/Foto...</span>
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*,.svg"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  {fotoUrl && (
+                    <div className="w-10 h-10 relative rounded-lg border overflow-hidden shrink-0 bg-slate-100">
+                      <img src={fotoUrl} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  placeholder="Atau tempel URL gambar..."
+                  value={fotoUrl}
+                  onChange={(e) => setFotoUrl(e.target.value)}
+                  className="block w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-600 mt-1"
+                />
+              </div>
+
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500 uppercase">Isi Artikel Berita</label>

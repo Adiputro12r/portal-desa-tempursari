@@ -11,6 +11,12 @@ export default function Navbar() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const pathname = usePathname();
 
+  // Hide Navbar on Admin and Login pages
+  if (pathname && (pathname.startsWith("/admin") || pathname === "/login")) {
+    return null;
+  }
+
+
   // Listen to scroll to adjust navbar background opacity
   useEffect(() => {
     const handleScroll = () => {
