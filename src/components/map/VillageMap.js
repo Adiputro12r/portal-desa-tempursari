@@ -24,7 +24,6 @@ export default function VillageMap() {
         GeoJSON: ReactLeaflet.GeoJSON,
         Marker: ReactLeaflet.Marker,
         Popup: ReactLeaflet.Popup,
-        useMap: ReactLeaflet.useMap,
         L: L
       });
 
@@ -53,17 +52,7 @@ export default function VillageMap() {
     );
   }
 
-  const { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap, L } = LeafletMap;
-
-  function MapController({ bounds }) {
-    const map = useMap();
-    useEffect(() => {
-      if (bounds) {
-        map.fitBounds(bounds, { padding: [50, 50] });
-      }
-    }, [bounds, map]);
-    return null;
-  }
+  const { MapContainer, TileLayer, GeoJSON, Marker, Popup, L } = LeafletMap;
 
   const getFilteredData = () => {
     if (!geojsonData) return { type: "FeatureCollection", features: [] };
@@ -189,6 +178,7 @@ export default function VillageMap() {
         <MapContainer
           center={[-7.655, 110.315]}
           zoom={14}
+          bounds={mapBounds || undefined}
           scrollWheelZoom={true}
           className="w-full h-full"
         >
@@ -232,8 +222,6 @@ export default function VillageMap() {
               </Marker>
             );
           })}
-
-          {mapBounds && <MapController bounds={mapBounds} />}
         </MapContainer>
       </div>
 
