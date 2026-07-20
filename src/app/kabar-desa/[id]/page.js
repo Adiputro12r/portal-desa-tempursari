@@ -9,10 +9,11 @@ import { ArrowLeft, Calendar, User, ChevronRight, Share2, Clipboard, Check } fro
 import { beritaData } from "@/data/beritaData";
 
 export default function DetailBerita({ params }) {
-  // Unwrap params using React.use() in newer NextJS versions or direct access
-  const unwrappedParams = use(params);
-  const id = unwrappedParams.id;
+  // Safe resolution of params for Next.js App Router
+  const unwrappedParams = params ? (typeof params.then === "function" ? use(params) : params) : {};
+  const id = unwrappedParams?.id;
   const router = useRouter();
+
   const [copied, setCopied] = useState(false);
 
   const artikel = beritaData.find((b) => b.id === id);

@@ -1,61 +1,84 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
-import { MapPin, Compass, Landmark, ShoppingBag, Eye } from "lucide-react";
-
-// Helper component to recenter/refit bounds of map when layer data changes
-function MapController({ bounds }) {
-  const map = useMap();
-  useEffect(() => {
-    if (bounds) {
-      map.fitBounds(bounds, { padding: [50, 50] });
-    }
-  }, [bounds, map]);
-  return null;
-}
+import { useEffect, useState } from "react";
+import { Compass, Landmark, ShoppingBag, MapPin } from "lucide-react";
 
 export default function VillageMap() {
+  const [mounted, setMounted] = useState(false);
   const [geojsonData, setGeojsonData] = useState(null);
   const [activeTab, setActiveTab] = useState("batas"); // batas, umkm_wisata, fasum
   const [mapBounds, setMapBounds] = useState(null);
+  const [LeafletMap, setLeafletMap] = useState(null);
 
-  // Fetch geojson on load
   useEffect(() => {
-    fetch("/maps/tempursari_dummy.geojson")
-      .then((res) => res.json())
-      .then((data) => {
-        setGeojsonData(data);
-        // Calculate initial bounds from the dusun polygon coordinates
-        const dusunFeatures = data.features.filter(f => f.properties.type === "dusun");
-        if (dusunFeatures.length > 0) {
-          const coordinates = dusunFeatures.flatMap(f => f.geometry.coordinates[0]);
-          const bounds = L.latLngBounds(coordinates.map(coord => [coord[1], coord[0]]));
-          setMapBounds(bounds);
-        }
-      })
-      .catch((err) => console.error("Gagal memuat GeoJSON:", err));
+    setMounted(true);
+    // Dynamically load Leaflet and React-Leaflet strictly on the client side
+    Promise.all([
+      import("react-leaflet"),
+      import("leaflet")
+    ]).then(([ReactLeaflet, LeafletModule]) => {
+      const L = LeafletModule.default || LeafletModule;
+      setLeafletMap({
+        MapContainer: ReactLeaflet.MapContainer,
+        TileLayer: ReactLeaflet.TileLayer,
+        GeoJSON: ReactLeaflet.GeoJSON,
+        Marker: ReactLeaflet.Marker,
+        Popup: ReactLeaflet.Popup,
+        useMap: ReactLeaflet.useMap,
+        L: L
+      });
+
+      // Fetch geojson on load
+      fetch("/maps/tempursari_dummy.geojson")
+        .then((res) => res.json())
+        .then((data) => {
+          setGeojsonData(data);
+          const dusunFeatures = data.features.filter(f => f.properties.type === "dusun");
+          if (dusunFeatures.length > 0) {
+            const coordinates = dusunFeatures.flatMap(f => f.geometry.coordinates[0]);
+            const bounds = L.latLngBounds(coordinates.map(coord => [coord[1], coord[0]]));
+            setMapBounds(bounds);
+          }
+        })
+        .catch((err) => console.error("Gagal memuat GeoJSON:", err));
+    });
   }, []);
 
-  // Filter features based on tab selection
+  if (!mounted || !LeafletMap) {
+    return (
+      <div className="bg-white border border-slate-100 rounded-3xl shadow-xl p-8 h-[500px] flex flex-col items-center justify-center space-y-4">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-700" />
+        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest animate-pulse">Memuat Peta Interaktif...</p>
+      </div>
+    );
+  }
+
+  const { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap, L } = LeafletMap;
+
+  function MapController({ bounds }) {
+    const map = useMap();
+    useEffect(() => {
+      if (bounds) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
+    }, [bounds, map]);
+    return null;
+  }
+
   const getFilteredData = () => {
     if (!geojsonData) return { type: "FeatureCollection", features: [] };
 
     if (activeTab === "batas") {
-      // Show only dusun polygons
       return {
         type: "FeatureCollection",
         features: geojsonData.features.filter((f) => f.properties.type === "dusun"),
       };
     } else if (activeTab === "umkm_wisata") {
-      // Show only umkm and wisata points
       return {
         type: "FeatureCollection",
         features: geojsonData.features.filter((f) => f.properties.type === "umkm" || f.properties.type === "wisata"),
       };
     } else if (activeTab === "fasum") {
-      // Show only public facilities points
       return {
         type: "FeatureCollection",
         features: geojsonData.features.filter((f) => f.properties.type === "fasum"),
@@ -64,7 +87,6 @@ export default function VillageMap() {
     return geojsonData;
   };
 
-  // Custom styling for GeoJSON Polygons (boundaries)
   const polygonStyle = (feature) => {
     return {
       fillColor: feature.properties.fillColor || "#10b981",
@@ -75,12 +97,11 @@ export default function VillageMap() {
     };
   };
 
-  // Custom marker creators using inline SVG DivIcons to bypass Leaflet asset loader bug
   const createCustomMarker = (type, category) => {
-    let color = "#15803d"; // default green
-    if (type === "wisata") color = "#0284c7"; // blue
-    if (type === "umkm") color = "#f59e0b"; // gold
-    if (type === "fasum" && category === "Pendidikan") color = "#9333ea"; // purple
+    let color = "#15803d";
+    if (type === "wisata") color = "#0284c7";
+    if (type === "umkm") color = "#f59e0b";
+    if (type === "fasum" && category === "Pendidikan") color = "#9333ea";
 
     const svgIcon = `<div style="background-color: ${color}; width: 34px; height: 34px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; color: white;">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
@@ -98,7 +119,6 @@ export default function VillageMap() {
     });
   };
 
-  // Interactive GeoJSON features callbacks
   const onEachFeature = (feature, layer) => {
     if (feature.properties && feature.properties.name) {
       const popupContent = `
@@ -117,7 +137,6 @@ export default function VillageMap() {
       `;
       layer.bindPopup(popupContent);
       
-      // Hover effects
       layer.on({
         mouseover: (e) => {
           const l = e.target;
@@ -135,8 +154,6 @@ export default function VillageMap() {
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-xl shadow-slate-100/50 space-y-6">
-      
-      {/* 3-Tab Filter Switcher */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-5">
         <h3 className="font-extrabold text-slate-800 text-base flex items-center space-x-2">
           <Compass className="w-5 h-5 text-emerald-600" />
@@ -168,7 +185,6 @@ export default function VillageMap() {
         </div>
       </div>
 
-      {/* Leaflet Map Rendering Area */}
       <div className="relative h-[500px] rounded-2xl overflow-hidden border border-slate-200">
         <MapContainer
           center={[-7.655, 110.315]}
@@ -176,23 +192,20 @@ export default function VillageMap() {
           scrollWheelZoom={true}
           className="w-full h-full"
         >
-          {/* Tile Layer (OSM Base Map) */}
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {/* Render boundary polygons (Dusun lines) */}
           {activeTab === "batas" && filteredGeojson.features.length > 0 && (
             <GeoJSON
-              key={activeTab} // Forces Leaflet to redraw layer on switch
+              key={activeTab}
               data={filteredGeojson}
               style={polygonStyle}
               onEachFeature={onEachFeature}
             />
           )}
 
-          {/* Render markers (UMKM, Wisata, Fasum) */}
           {activeTab !== "batas" && filteredGeojson.features.map((feature, idx) => {
             const [lon, lat] = feature.geometry.coordinates;
             return (
@@ -220,12 +233,10 @@ export default function VillageMap() {
             );
           })}
 
-          {/* Map bounds auto adjustment */}
           {mapBounds && <MapController bounds={mapBounds} />}
         </MapContainer>
       </div>
 
-      {/* Map Legend */}
       <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-wrap gap-4 text-xs font-semibold text-slate-600 justify-center">
         <div className="flex items-center space-x-2">
           <span className="w-3 h-3 bg-emerald-500 rounded-full border border-white shadow-sm inline-block" />
@@ -248,7 +259,6 @@ export default function VillageMap() {
           <span>Fasilitas Umum</span>
         </div>
       </div>
-
     </div>
   );
 }
