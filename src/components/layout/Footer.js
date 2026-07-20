@@ -54,11 +54,18 @@ export default function Footer() {
               <li>
                 <Link href="/profil/demografi" className="hover:text-emerald-400 transition-colors">Demografi</Link>
               </li>
-              <li className="col-span-2">
+              <li>
                 <Link href="/peta" className="hover:text-emerald-400 transition-colors font-bold text-emerald-500">Peta Interaktif</Link>
+              </li>
+              <li>
+                <Link href="/login" className="hover:text-emerald-400 transition-colors flex items-center space-x-1 text-slate-400">
+                  <span>Portal Admin</span>
+                  <Lock className="w-3 h-3 text-emerald-500" />
+                </Link>
               </li>
             </ul>
           </div>
+
 
           {/* Col 3: Contact & Address */}
           <div className="space-y-4">
