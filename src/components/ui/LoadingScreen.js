@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function LoadingScreen() {
+  const [mounted, setMounted] = useState(false);
   const [show, setShow] = useState(true);
 
   useEffect(() => {
+    setMounted(true);
     // Keep splash visible for 1.8 seconds, then fade out
     const timer = setTimeout(() => {
       setShow(false);
@@ -14,6 +16,9 @@ export default function LoadingScreen() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  if (!mounted) return null;
+
 
   return (
     <AnimatePresence>
