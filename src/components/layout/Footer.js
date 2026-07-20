@@ -77,19 +77,24 @@ export default function Footer() {
       <div className="bg-slate-900/60 py-6 border-t border-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold">
           <p>© 2026 Pemerintah Desa Tempursari. Seluruh hak cipta dilindungi.</p>
-          <div className="flex items-center space-x-1.5 text-slate-400">
-            <span>Dibuat dengan</span>
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-            <span>oleh</span>
-            <span className="text-emerald-400 font-bold hover:underline cursor-pointer">
-              Tim KKN Desa Tempursari 2026
-            </span>
+          <div className="flex flex-wrap items-center gap-2 text-slate-400">
+            <div className="flex items-center space-x-1">
+              <span>Dibuat dengan</span>
+              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+              <span>oleh</span>
+              <span className="text-emerald-400 font-bold hover:underline cursor-pointer">
+                Tim KKN Desa Tempursari 2026
+              </span>
+            </div>
+            
+            {/* Explicit Admin Portal Button */}
             <Link 
               href="/login" 
-              className="p-1 hover:bg-slate-800 rounded text-slate-700 hover:text-slate-500 transition-all ml-1.5" 
-              title="Admin Portal"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 hover:text-white rounded-xl text-[11px] font-extrabold tracking-wider uppercase transition-all shadow-md shadow-emerald-950/50 hover:scale-105" 
+              title="Akses Dashboard Admin Desa"
             >
-              <Lock className="w-3.5 h-3.5" />
+              <Lock className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Portal Admin</span>
             </Link>
           </div>
         </div>
@@ -97,4 +102,5 @@ export default function Footer() {
     </footer>
   );
 }
+
 
