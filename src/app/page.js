@@ -9,13 +9,28 @@ import AparatSlider from "@/components/sections/AparatSlider";
 import { beritaData } from "@/data/beritaData";
 import { supabase } from "@/lib/supabase";
 
+const KADES_CACHE_KEY = "kades_info_cache";
+const KADES_CACHE_TTL = 5 * 60 * 1000; // 5 menit
+
 export default function Home() {
-  const [kadesInfo, setKadesInfo] = useState({
-    nama: "Hajah aina",
-    foto: "/assets/avatar-kades.svg",
-  });
+  const [kadesInfo, setKadesInfo] = useState(null); // null = still loading from cache
+  const [kadesLoaded, setKadesLoaded] = useState(false);
 
   useEffect(() => {
+    // Step 1: Load from cache instantly
+    try {
+      const cached = localStorage.getItem(KADES_CACHE_KEY);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (data) {
+          setKadesInfo(data);
+          setKadesLoaded(true);
+          if (Date.now() - timestamp < KADES_CACHE_TTL) return;
+        }
+      }
+    } catch (_) {}
+
+    // Step 2: Fetch from Supabase silently
     const fetchKades = async () => {
       try {
         const { data } = await supabase
@@ -25,13 +40,19 @@ export default function Home() {
           .limit(1);
 
         if (data && data.length > 0) {
-          setKadesInfo({
+          const info = {
             nama: data[0].nama || "Hajah aina",
             foto: data[0].foto_url || "/assets/avatar-kades.svg",
-          });
+          };
+          setKadesInfo(info);
+          localStorage.setItem(KADES_CACHE_KEY, JSON.stringify({ data: info, timestamp: Date.now() }));
+        } else if (!kadesLoaded) {
+          setKadesInfo({ nama: "Hajah aina", foto: "/assets/avatar-kades.svg" });
         }
       } catch (err) {
-        // fallback
+        if (!kadesLoaded) setKadesInfo({ nama: "Hajah aina", foto: "/assets/avatar-kades.svg" });
+      } finally {
+        setKadesLoaded(true);
       }
     };
     fetchKades();
@@ -83,17 +104,30 @@ export default function Home() {
             
             {/* Kades Photo & Quote */}
             <div className="lg:col-span-5 flex flex-col items-center">
-              <div className="relative w-72 h-80 bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden shadow-2xl group">
-                <Image
-                  src={kadesInfo.foto}
-                  alt="Kepala Desa Tempursari"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+              <div className="relative w-72 h-80 bg-slate-100 border border-slate-200 rounded-3xl overflow-hidden shadow-2xl group">
+                {kadesInfo ? (
+                  <Image
+                    src={kadesInfo.foto}
+                    alt="Kepala Desa Tempursari"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full animate-pulse bg-slate-200" />
+                )}
               </div>
-              <div className="text-center mt-4">
-                <h4 className="font-extrabold text-lg text-slate-800">{kadesInfo.nama}</h4>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Kepala Desa Tempursari</p>
+              <div className="text-center mt-4 min-h-[44px]">
+                {kadesInfo ? (
+                  <>
+                    <h4 className="font-extrabold text-lg text-slate-800">{kadesInfo.nama}</h4>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Kepala Desa Tempursari</p>
+                  </>
+                ) : (
+                  <div className="space-y-2 animate-pulse">
+                    <div className="h-5 bg-slate-200 rounded w-36 mx-auto" />
+                    <div className="h-3 bg-slate-100 rounded w-28 mx-auto" />
+                  </div>
+                )}
               </div>
             </div>
 

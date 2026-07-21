@@ -7,6 +7,23 @@ import { aparatData as defaultAparatData } from "@/data/aparatData";
 import ModalPhone from "@/components/ui/ModalPhone";
 import { supabase } from "@/lib/supabase";
 
+const CACHE_KEY = "aparat_desa_cache";
+const CACHE_TTL = 5 * 60 * 1000; // 5 menit
+
+function sortAparat(data) {
+  return [...data].sort((a, b) => {
+    const isKadesA = a.jabatan?.toLowerCase().includes("kepala desa") || a.jabatan?.toLowerCase() === "kades";
+    const isKadesB = b.jabatan?.toLowerCase().includes("kepala desa") || b.jabatan?.toLowerCase() === "kades";
+    if (isKadesA && !isKadesB) return -1;
+    if (!isKadesA && isKadesB) return 1;
+    return (a.urutan ?? 0) - (b.urutan ?? 0);
+  }).map((item) => ({
+    ...item,
+    foto: item.foto_url || item.foto || "/assets/avatar-kades.svg",
+    hasWhatsapp: item.hasWhatsapp ?? (item.kontak ? item.kontak.startsWith("+") : true),
+  }));
+}
+
 export default function AparatSlider() {
   const scrollContainerRef = useRef(null);
   const [aparatList, setAparatList] = useState([]);
@@ -15,6 +32,21 @@ export default function AparatSlider() {
   const [selectedAparat, setSelectedAparat] = useState(null);
 
   useEffect(() => {
+    // Step 1: Load from localStorage cache instantly (no shimmer if cached)
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (data && data.length > 0) {
+          setAparatList(data);
+          setLoading(false);
+          // If cache is still fresh (< 5 menit), skip re-fetch
+          if (Date.now() - timestamp < CACHE_TTL) return;
+        }
+      }
+    } catch (_) {}
+
+    // Step 2: Fetch from Supabase (silently in background if cache was used)
     const fetchAparat = async () => {
       try {
         const { data, error } = await supabase
@@ -22,26 +54,15 @@ export default function AparatSlider() {
           .select("*");
 
         if (!error && data && data.length > 0) {
-          // Sort so Kepala Desa is always first (far left)
-          const sorted = [...data].sort((a, b) => {
-            const isKadesA = a.jabatan?.toLowerCase().includes("kepala desa") || a.jabatan?.toLowerCase() === "kades";
-            const isKadesB = b.jabatan?.toLowerCase().includes("kepala desa") || b.jabatan?.toLowerCase() === "kades";
-            if (isKadesA && !isKadesB) return -1;
-            if (!isKadesA && isKadesB) return 1;
-            return (a.urutan ?? 0) - (b.urutan ?? 0);
-          });
-
-          const formatted = sorted.map((item) => ({
-            ...item,
-            foto: item.foto_url || item.foto || "/assets/avatar-kades.svg",
-            hasWhatsapp: item.hasWhatsapp ?? (item.kontak ? item.kontak.startsWith("+") : true),
-          }));
+          const formatted = sortAparat(data);
           setAparatList(formatted);
+          // Save to cache
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ data: formatted, timestamp: Date.now() }));
         } else {
-          setAparatList(defaultAparatData);
+          setAparatList(prev => prev.length > 0 ? prev : defaultAparatData);
         }
       } catch (err) {
-        setAparatList(defaultAparatData);
+        setAparatList(prev => prev.length > 0 ? prev : defaultAparatData);
       } finally {
         setLoading(false);
       }
