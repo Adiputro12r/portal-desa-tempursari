@@ -15,6 +15,8 @@ const KADES_CACHE_TTL = 5 * 60 * 1000; // 5 menit
 export default function Home() {
   const [kadesInfo, setKadesInfo] = useState(null); // null = still loading from cache
   const [kadesLoaded, setKadesLoaded] = useState(false);
+  const [recentArticles, setRecentArticles] = useState([]);
+  const [loadingArticles, setLoadingArticles] = useState(true);
 
   useEffect(() => {
     // Step 1: Load from cache instantly
@@ -55,11 +57,27 @@ export default function Home() {
         setKadesLoaded(true);
       }
     };
-    fetchKades();
+    // Step 3: Fetch Recent Articles
+    const fetchArticles = async () => {
+      try {
+        const { data } = await supabase
+          .from("artikel")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(3);
+        if (data && data.length > 0) {
+          setRecentArticles(data);
+        } else {
+          setRecentArticles(beritaData.slice(0, 3));
+        }
+      } catch (err) {
+        setRecentArticles(beritaData.slice(0, 3));
+      } finally {
+        setLoadingArticles(false);
+      }
+    };
+    fetchArticles();
   }, []);
-
-  // Take top 3 articles for landing page preview
-  const recentArticles = beritaData.slice(0, 3);
 
   const stats = [
     { label: "Jumlah Penduduk", value: "1,795 Orang", icon: Users, color: "bg-emerald-100 text-emerald-700" },
@@ -192,11 +210,24 @@ export default function Home() {
 
           {/* Grid Content */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {recentArticles.map((artikel) => (
-              <div
-                key={artikel.id}
-                className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col group hover:-translate-y-1 transition-all duration-300"
-              >
+            {loadingArticles ? (
+              [1, 2, 3].map((n) => (
+                <div key={n} className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col animate-pulse">
+                  <div className="h-48 bg-slate-200" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-3 bg-slate-200 rounded w-1/3" />
+                    <div className="h-5 bg-slate-200 rounded w-full" />
+                    <div className="h-4 bg-slate-100 rounded w-full" />
+                    <div className="h-4 bg-slate-100 rounded w-4/5" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              recentArticles.map((artikel) => (
+                <div
+                  key={artikel.id}
+                  className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col group hover:-translate-y-1 transition-all duration-300"
+                >
                 {/* Cover Image */}
                 <div className="relative h-48 bg-slate-100 overflow-hidden">
                   <Image
@@ -234,7 +265,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-            ))}
+            )))}
           </div>
 
         </div>

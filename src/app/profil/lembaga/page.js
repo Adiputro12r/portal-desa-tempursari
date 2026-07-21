@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMaxLoading } from "@/lib/useMinLoading";
+
 import Image from "next/image";
 import { Landmark, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -36,7 +36,7 @@ function SectionSkeleton() {
 
 export default function LembagaDesa() {
   const [sections, setSections] = useState([]);
-  const [loading, stopLoading] = useMaxLoading(1000);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.title = "Lembaga Desa - Portal Desa Tempursari";
@@ -47,7 +47,7 @@ export default function LembagaDesa() {
         const { data, timestamp } = JSON.parse(cached);
         if (data?.length > 0) {
           setSections(data);
-          stopLoading();
+          setLoading(false);
           if (Date.now() - timestamp < CACHE_TTL) return;
         }
       }
@@ -68,7 +68,7 @@ export default function LembagaDesa() {
       } catch (_) {
         setSections(prev => prev.length > 0 ? prev : fallback);
       } finally {
-        stopLoading();
+        setLoading(false);
       }
     };
     fetchData();

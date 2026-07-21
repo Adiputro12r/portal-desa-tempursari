@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState, useEffect } from "react";
-import { useMaxLoading } from "@/lib/useMinLoading";
+
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -77,7 +77,7 @@ export default function DetailBerita({ params }) {
 
   const [artikel, setArtikel] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
-  const [loading, stopLoading] = useMaxLoading(1000);
+  const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function DetailBerita({ params }) {
         }
         if (recData) setRecommendations(recData);
       } catch (_) {}
-      finally { stopLoading(); }
+      finally { setLoading(false); }
     };
     fetchArtikel();
   }, [id]);

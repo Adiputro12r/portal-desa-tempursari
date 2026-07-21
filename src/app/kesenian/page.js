@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMaxLoading } from "@/lib/useMinLoading";
+
 import Image from "next/image";
 import { Music, Calendar, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -35,7 +35,7 @@ function CardSkeleton() {
 
 export default function KesenianDaerah() {
   const [kesenianList, setKesenianList] = useState([]);
-  const [loading, stopLoading] = useMaxLoading(1000);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.title = "Kesenian & Budaya - Portal Desa Tempursari";
@@ -46,7 +46,7 @@ export default function KesenianDaerah() {
         const { data, timestamp } = JSON.parse(cached);
         if (data?.length > 0) {
           setKesenianList(data);
-          stopLoading();
+          setLoading(false);
           if (Date.now() - timestamp < CACHE_TTL) return;
         }
       }
@@ -64,7 +64,7 @@ export default function KesenianDaerah() {
       } catch (_) {
         setKesenianList(prev => prev.length > 0 ? prev : fallbackKesenian);
       } finally {
-        stopLoading();
+        setLoading(false);
       }
     };
     fetchData();
