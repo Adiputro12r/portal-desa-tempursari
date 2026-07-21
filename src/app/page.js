@@ -13,24 +13,32 @@ import { memoryCache } from "@/lib/memoryCache";
 const KADES_CACHE_KEY = "kades_info_cache";
 const KADES_CACHE_TTL = 5 * 60 * 1000; // 5 menit
 
+function initFromCache(cacheKey, fallback) {
+  if (memoryCache[cacheKey]) return memoryCache[cacheKey];
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { data } = JSON.parse(cached);
+      if (data) return data;
+    }
+  } catch (_) {}
+  return fallback;
+}
+
 export default function Home() {
-  const [kadesInfo, setKadesInfo] = useState(() => memoryCache[KADES_CACHE_KEY] || { nama: "Loading...", foto: "/assets/avatar-kades.svg" });
-  const [kadesLoaded, setKadesLoaded] = useState(() => !!memoryCache[KADES_CACHE_KEY]);
-  const [recentArticles, setRecentArticles] = useState(() => memoryCache["recent_articles"] || beritaData.slice(0, 3));
+  const [kadesInfo, setKadesInfo] = useState(() => initFromCache(KADES_CACHE_KEY, { nama: "Hajah aina", foto: "/assets/avatar-kades.svg" }));
+  const [kadesLoaded, setKadesLoaded] = useState(() => !!memoryCache[KADES_CACHE_KEY] || !!localStorage.getItem?.(KADES_CACHE_KEY));
+  const [recentArticles, setRecentArticles] = useState(() => initFromCache("recent_articles", null) || beritaData.slice(0, 3));
 
   useEffect(() => {
-    // Step 1: Load from cache instantly
+    // localStorage sudah dibaca di initializer, cek freshness saja
     try {
       const cached = localStorage.getItem(KADES_CACHE_KEY);
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
-        if (data) {
-          setKadesInfo(data);
-          setKadesLoaded(true);
-          if (Date.now() - timestamp < KADES_CACHE_TTL) {
-            memoryCache[KADES_CACHE_KEY] = data;
-            return;
-          }
+        if (data && Date.now() - timestamp < KADES_CACHE_TTL) {
+          memoryCache[KADES_CACHE_KEY] = data;
+          return; // Cache masih fresh
         }
       }
     } catch (_) {}

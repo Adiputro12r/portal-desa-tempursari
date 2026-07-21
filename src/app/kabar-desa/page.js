@@ -21,25 +21,34 @@ function parseFirstImage(foto_url) {
   return foto_url;
 }
 
+function initFromCache(cacheKey, fallback) {
+  if (memoryCache[cacheKey]) return memoryCache[cacheKey];
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { data } = JSON.parse(cached);
+      if (data?.length > 0) return data;
+    }
+  } catch (_) {}
+  return fallback;
+}
+
 export default function KabarDesa() {
-  const [beritaList, setBeritaList] = useState(() => memoryCache[CACHE_KEY] || fallbackData);
+  const [beritaList, setBeritaList] = useState(() => initFromCache(CACHE_KEY, fallbackData));
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
 
   useEffect(() => {
     document.title = "Kabar Desa - Portal Desa Tempursari";
 
-    // Step 1: cache
+    // localStorage sudah dibaca di initializer, cek freshness saja
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
-        if (data?.length > 0) {
-          setBeritaList(data);
-          if (Date.now() - timestamp < CACHE_TTL) {
-            memoryCache[CACHE_KEY] = data;
-            return;
-          }
+        if (data?.length > 0 && Date.now() - timestamp < CACHE_TTL) {
+          memoryCache[CACHE_KEY] = data;
+          return; // Cache masih fresh, skip fetch
         }
       }
     } catch (_) {}

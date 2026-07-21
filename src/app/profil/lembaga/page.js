@@ -21,8 +21,20 @@ function parseFirstImage(foto_url) {
   return foto_url;
 }
 
+function initFromCache(cacheKey, fallback) {
+  if (memoryCache[cacheKey]) return memoryCache[cacheKey];
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { data } = JSON.parse(cached);
+      if (data?.length > 0) return data;
+    }
+  } catch (_) {}
+  return fallback;
+}
+
 export default function LembagaDesa() {
-  const [sections, setSections] = useState(() => memoryCache[CACHE_KEY] || fallback);
+  const [sections, setSections] = useState(() => initFromCache(CACHE_KEY, fallback));
 
   useEffect(() => {
     document.title = "Lembaga Desa - Portal Desa Tempursari";
@@ -31,12 +43,9 @@ export default function LembagaDesa() {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
-        if (data?.length > 0) {
-          setSections(data);
-          if (Date.now() - timestamp < CACHE_TTL) {
-            memoryCache[CACHE_KEY] = data;
-            return;
-          }
+        if (data?.length > 0 && Date.now() - timestamp < CACHE_TTL) {
+          memoryCache[CACHE_KEY] = data;
+          return;
         }
       }
     } catch (_) {}

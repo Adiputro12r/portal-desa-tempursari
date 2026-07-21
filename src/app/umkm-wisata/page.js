@@ -21,20 +21,27 @@ function parseFirstImage(foto_url) {
   return foto_url;
 }
 
-
+function initFromCache(cacheKey, fallback) {
+  if (memoryCache[cacheKey]) return memoryCache[cacheKey];
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { data } = JSON.parse(cached);
+      if (data?.length > 0) return data;
+    }
+  } catch (_) {}
+  return fallback;
+}
 
 async function fetchWithCache(cacheKey, supabaseTable, fallback, setter) {
-  // Try cache
+  // Cek freshness cache saja (data sudah di-init oleh initFromCache)
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, timestamp } = JSON.parse(cached);
-      if (data?.length > 0) {
-        setter(data);
-        if (Date.now() - timestamp < CACHE_TTL) {
-          memoryCache[cacheKey] = data;
-          return;
-        }
+      if (data?.length > 0 && Date.now() - timestamp < CACHE_TTL) {
+        memoryCache[cacheKey] = data;
+        return; // Cache fresh, skip Supabase
       }
     }
   } catch (_) {}
@@ -60,8 +67,8 @@ async function fetchWithCache(cacheKey, supabaseTable, fallback, setter) {
 
 export default function UmkmWisata() {
   const [activeTab, setActiveTab] = useState("semua");
-  const [umkmList, setUmkmList] = useState(() => memoryCache[CACHE_KEY_UMKM] || fallbackUmkm);
-  const [wisataList, setWisataList] = useState(() => memoryCache[CACHE_KEY_WISATA] || fallbackWisata);
+  const [umkmList, setUmkmList] = useState(() => initFromCache(CACHE_KEY_UMKM, fallbackUmkm));
+  const [wisataList, setWisataList] = useState(() => initFromCache(CACHE_KEY_WISATA, fallbackWisata));
 
   useEffect(() => {
     document.title = "Potensi Wisata & UMKM - Portal Desa Tempursari";
