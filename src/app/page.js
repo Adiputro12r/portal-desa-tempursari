@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, BookOpen, Calendar, MapPin, Award, Users, Landmark } from "lucide-react";
 import HeroSection from "@/components/sections/HeroSection";
 import AparatSlider from "@/components/sections/AparatSlider";
@@ -143,10 +144,11 @@ export default function Home() {
             <div className="lg:col-span-5 flex flex-col items-center">
               <div className="relative w-72 h-80 bg-slate-100 border border-slate-200 rounded-3xl overflow-hidden shadow-2xl group">
                 {kadesInfo ? (
-                  <img
+                  <Image
                     src={kadesInfo.foto}
                     alt="Kepala Desa Tempursari"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
                   <div className="w-full h-full animate-pulse bg-slate-200" />
@@ -248,10 +250,11 @@ export default function Home() {
                 >
                 {/* Cover Image */}
                 <div className="relative h-48 bg-slate-100 overflow-hidden">
-                  <img
+                  <Image
                     src={artikel.foto_url}
                     alt={artikel.judul}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute top-4 left-4 bg-emerald-600 text-white font-extrabold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
                     {artikel.kategori}
