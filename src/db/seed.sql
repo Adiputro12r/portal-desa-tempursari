@@ -1,6 +1,7 @@
 -- ==========================================
 -- SEED SQL: SEED DATA DUMMY & ADMIN ACCOUNTS
 -- Jalankan skrip ini setelah schema.sql selesai dijalankan
+-- Aman dijalankan ulang: menggunakan ON CONFLICT DO NOTHING
 -- ==========================================
 
 -- 1. Seeding Akun Admin ke Auth Supabase
@@ -58,3 +59,27 @@ values
   ('Lembaga Pemberdayaan Masyarakat Desa (LPMD)', 'Lembaga yang membantu Pemerintah Desa dalam menyerap aspirasi pembangunan desa dan menggerakkan partisipasi swadaya gotong royong warga.', '/assets/logo-lpmd.svg'),
   ('Pemberdayaan Kesejahteraan Keluarga (PKK)', 'Gerakan pembangunan masyarakat yang tumbuh dari bawah dengan wanita sebagai penggeraknya untuk mewujudkan keluarga sejahtera.', '/assets/logo-pkk.svg'),
   ('Karang Taruna Tunas Harapan', 'Wadah pengembangan generasi muda desa di bidang sosial, olahraga, kesenian, dan kepemimpinan untuk kemajuan pemuda desa.', '/assets/logo-kartar.svg');
+
+-- 8. Seeding Data Demografi Desa
+insert into demografi_desa (kategori, nama, jumlah)
+values
+  -- Pekerjaan
+  ('Pekerjaan', 'Petani/Pekebun', 450),
+  ('Pekerjaan', 'Buruh Tani', 210),
+  ('Pekerjaan', 'Karyawan Swasta', 180),
+  ('Pekerjaan', 'Wiraswasta/UMKM', 120),
+  ('Pekerjaan', 'PNS/TNI/Polri', 45),
+  ('Pekerjaan', 'Belum Bekerja', 300),
+  -- Pendidikan
+  ('Pendidikan', 'Tidak Tamat SD', 80),
+  ('Pendidikan', 'Tamat SD/Sederajat', 350),
+  ('Pendidikan', 'Tamat SMP/Sederajat', 420),
+  ('Pendidikan', 'Tamat SMA/Sederajat', 580),
+  ('Pendidikan', 'Tamat Diploma/Sarjana', 120),
+  -- Usia
+  ('Usia', '0-4 tahun', 95),
+  ('Usia', '5-14 tahun', 210),
+  ('Usia', '15-24 tahun', 340),
+  ('Usia', '25-49 tahun', 680),
+  ('Usia', '50-64 tahun', 410),
+  ('Usia', '65+ tahun', 150);

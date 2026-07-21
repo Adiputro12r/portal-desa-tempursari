@@ -80,7 +80,7 @@ export default function ManageBerita() {
       konten,
       kategori,
       foto_url: stringifyImages(images),
-      tanggal: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }),
+      tanggal: new Date().toISOString().split("T")[0], // format: YYYY-MM-DD
       author: "Admin Desa"
     };
 
