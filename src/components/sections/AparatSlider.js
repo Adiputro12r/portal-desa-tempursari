@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { useMinLoading } from "@/lib/useMinLoading";
+import { useMaxLoading } from "@/lib/useMinLoading";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Phone, MessageSquare } from "lucide-react";
 import { aparatData as defaultAparatData } from "@/data/aparatData";
@@ -28,7 +28,7 @@ function sortAparat(data) {
 export default function AparatSlider() {
   const scrollContainerRef = useRef(null);
   const [aparatList, setAparatList] = useState([]);
-  const [loading, , stopLoading] = useMinLoading(1000);
+  const [loading, stopLoading] = useMaxLoading(1000);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAparat, setSelectedAparat] = useState(null);
 

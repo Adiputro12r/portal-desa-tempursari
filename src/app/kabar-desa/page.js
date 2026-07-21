@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMinLoading } from "@/lib/useMinLoading";
+import { useMaxLoading } from "@/lib/useMinLoading";
 import Link from "next/link";
 import Image from "next/image";
 import { BookOpen, Calendar, Search, Newspaper } from "lucide-react";
@@ -37,7 +37,7 @@ function BeritaSkeleton() {
 
 export default function KabarDesa() {
   const [beritaList, setBeritaList] = useState([]);
-  const [loading, , stopLoading] = useMinLoading(1000);
+  const [loading, stopLoading] = useMaxLoading(1000);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
 

@@ -1,46 +1,36 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 /**
- * useMinLoading — shimmer tampil minimal `minMs` milidetik.
+ * useMaxLoading — shimmer berhenti setelah `maxMs` milidetik,
+ * atau lebih cepat jika data sudah tiba.
  *
  * Cara pakai:
- *   const [loading, startLoading, stopLoading] = useMinLoading(1000);
+ *   const [loading, stopLoading] = useMaxLoading(1000);
  *
  *   async function fetchData() {
- *     startLoading();
  *     try { ... } finally { stopLoading(); }
  *   }
  *
- * - Jika fetch selesai SEBELUM minMs → shimmer tetap tampil sampai minMs habis.
- * - Jika fetch selesai SETELAH minMs → shimmer langsung hilang.
+ * - Jika fetch selesai SEBELUM maxMs → shimmer langsung hilang.
+ * - Jika fetch LEBIH DARI maxMs → shimmer paksa hilang setelah maxMs
+ *   (tampilkan fallback data yang sudah ada).
  */
-export function useMinLoading(minMs = 1000) {
+export function useMaxLoading(maxMs = 1000) {
   const [loading, setLoading] = useState(true);
-  const startRef = useRef(null);
-  const fetchDoneRef = useRef(false);
   const timerRef = useRef(null);
 
-  const startLoading = useCallback(() => {
-    setLoading(true);
-    fetchDoneRef.current = false;
-    startRef.current = Date.now();
+  const stopLoading = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    setLoading(false);
   }, []);
 
-  const stopLoading = useCallback(() => {
-    fetchDoneRef.current = true;
-    const elapsed = Date.now() - (startRef.current ?? Date.now());
-    const remaining = Math.max(0, minMs - elapsed);
-    timerRef.current = setTimeout(() => setLoading(false), remaining);
-  }, [minMs]);
-
-  // Auto-start saat mount (untuk fetch di useEffect awal)
+  // Auto-stop paksa setelah maxMs dari mount
   useEffect(() => {
-    startRef.current = Date.now();
+    timerRef.current = setTimeout(() => setLoading(false), maxMs);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, []);
+  }, [maxMs]);
 
-  return [loading, startLoading, stopLoading];
+  return [loading, stopLoading];
 }

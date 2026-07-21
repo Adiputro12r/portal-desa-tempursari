@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMinLoading } from "@/lib/useMinLoading";
+import { useMaxLoading } from "@/lib/useMinLoading";
 import Image from "next/image";
 import { Music, Calendar, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -35,7 +35,7 @@ function CardSkeleton() {
 
 export default function KesenianDaerah() {
   const [kesenianList, setKesenianList] = useState([]);
-  const [loading, , stopLoading] = useMinLoading(1000);
+  const [loading, stopLoading] = useMaxLoading(1000);
 
   useEffect(() => {
     document.title = "Kesenian & Budaya - Portal Desa Tempursari";

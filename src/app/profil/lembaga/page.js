@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMinLoading } from "@/lib/useMinLoading";
+import { useMaxLoading } from "@/lib/useMinLoading";
 import Image from "next/image";
 import { Landmark, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -36,7 +36,7 @@ function SectionSkeleton() {
 
 export default function LembagaDesa() {
   const [sections, setSections] = useState([]);
-  const [loading, , stopLoading] = useMinLoading(1000);
+  const [loading, stopLoading] = useMaxLoading(1000);
 
   useEffect(() => {
     document.title = "Lembaga Desa - Portal Desa Tempursari";
