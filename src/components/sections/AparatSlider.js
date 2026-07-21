@@ -1,38 +1,103 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { memoryCache } from "@/lib/memoryCache";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Phone, MessageSquare } from "lucide-react";
+import { aparatData as defaultAparatData } from "@/data/aparatData";
 import ModalPhone from "@/components/ui/ModalPhone";
+import { supabase } from "@/lib/supabase";
 
-/**
- * AparatSlider — Client Component (slider interaktif + modal kontak)
- *
- * Data aparat di-fetch oleh Server Component parent (page.js / layout)
- * dan dikirim ke sini sebagai prop `initialData`.
- * Komponen ini TIDAK melakukan fetch apapun.
- */
-export default function AparatSlider({ initialData = [] }) {
+const CACHE_KEY = "aparat_desa_cache";
+const CACHE_TTL = 5 * 60 * 1000; // 5 menit
+
+function sortAparat(data) {
+  return [...data].sort((a, b) => {
+    const isKadesA = a.jabatan?.toLowerCase().includes("kepala desa") || a.jabatan?.toLowerCase() === "kades";
+    const isKadesB = b.jabatan?.toLowerCase().includes("kepala desa") || b.jabatan?.toLowerCase() === "kades";
+    if (isKadesA && !isKadesB) return -1;
+    if (!isKadesA && isKadesB) return 1;
+    return (a.urutan ?? 0) - (b.urutan ?? 0);
+  }).map((item) => ({
+    ...item,
+    foto: item.foto_url || item.foto || "/assets/avatar-kades.svg",
+    hasWhatsapp: item.hasWhatsapp ?? (item.kontak ? item.kontak.startsWith("+") : true),
+  }));
+}
+
+export default function AparatSlider() {
   const scrollContainerRef = useRef(null);
+  const [aparatList, setAparatList] = useState(() => memoryCache[CACHE_KEY] || []);
+  const [loading, setLoading] = useState(() => !memoryCache[CACHE_KEY]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAparat, setSelectedAparat] = useState(null);
 
+  useEffect(() => {
+    // Step 1: Load from localStorage cache instantly (no shimmer if cached)
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (data && data.length > 0) {
+          setAparatList(data);
+          setLoading(false);
+          // If cache is still fresh (< 5 menit), skip re-fetch
+          if (Date.now() - timestamp < CACHE_TTL) {
+            memoryCache[CACHE_KEY] = data; // Simpan ke memory
+            return;
+          }
+        }
+      }
+    } catch (_) {}
+
+    // Step 2: Fetch from Supabase (silently in background if cache was used)
+    const fetchAparat = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("pemerintah_desa")
+          .select("*");
+
+        if (!error && data && data.length > 0) {
+          const formatted = sortAparat(data);
+          setAparatList(formatted);
+          // Save to cache
+          memoryCache[CACHE_KEY] = formatted;
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ data: formatted, timestamp: Date.now() }));
+        } else {
+          setAparatList(prev => prev.length > 0 ? prev : defaultAparatData);
+          memoryCache[CACHE_KEY] = defaultAparatData;
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ data: defaultAparatData, timestamp: Date.now() }));
+        }
+      } catch (_) {
+        setAparatList(prev => prev.length > 0 ? prev : defaultAparatData);
+        memoryCache[CACHE_KEY] = defaultAparatData;
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAparat();
+  }, []);
+
   const scrollLeft = () => {
-    scrollContainerRef.current?.scrollBy({ left: -320, behavior: "smooth" });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -320, behavior: "smooth" });
+    }
   };
 
   const scrollRight = () => {
-    scrollContainerRef.current?.scrollBy({ left: 320, behavior: "smooth" });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 320, behavior: "smooth" });
+    }
   };
 
   const handleContactClick = (aparat) => {
     if (aparat.hasWhatsapp) {
+      // Open WhatsApp Link
       const cleanPhone = aparat.kontak.replace("+", "");
-      window.open(
-        `https://wa.me/${cleanPhone}?text=Halo%20Pak/Bu%20${aparat.nama},%20saya%20ingin%20bertanya%20mengenai%20layanan%20desa.`,
-        "_blank"
-      );
+      window.open(`https://wa.me/${cleanPhone}?text=Halo%20Pak/Bu%20${aparat.nama},%20saya%20ingin%20bertanya%20mengenai%20layanan%20desa.`, "_blank");
     } else {
+      // Open Phone Modal
       setSelectedAparat(aparat);
       setModalOpen(true);
     }
@@ -55,23 +120,20 @@ export default function AparatSlider({ initialData = [] }) {
               Aparat Pemerintah Desa Tempursari
             </h2>
             <p className="text-slate-500 text-sm max-w-xl">
-              Siap melayani masyarakat desa dengan integritas, transparansi, dan
-              dedikasi penuh demi kemajuan Desa Tempursari.
+              Siap melayani masyarakat desa dengan integritas, transparansi, dan dedikasi penuh demi kemajuan Desa Tempursari.
             </p>
           </div>
-
+          
           {/* Custom Navigation Arrows */}
           <div className="flex items-center space-x-3 mt-6 md:mt-0">
             <button
               onClick={scrollLeft}
-              aria-label="Geser kiri"
               className="p-3 bg-white hover:bg-emerald-600 hover:text-white rounded-full shadow-md text-slate-600 transition-all border border-slate-200"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={scrollRight}
-              aria-label="Geser kanan"
               className="p-3 bg-white hover:bg-emerald-600 hover:text-white rounded-full shadow-md text-slate-600 transition-all border border-slate-200"
             >
               <ChevronRight className="w-5 h-5" />
@@ -84,12 +146,27 @@ export default function AparatSlider({ initialData = [] }) {
           ref={scrollContainerRef}
           className="flex space-x-6 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-smooth px-1"
         >
-          {initialData.map((aparat) => (
+          {loading
+            ? [1, 2, 3, 4].map((n) => (
+                <div
+                  key={n}
+                  className="flex-shrink-0 w-[290px] sm:w-[310px] bg-white rounded-2xl border border-slate-100 p-0 overflow-hidden shadow-lg animate-pulse"
+                >
+                  <div className="h-72 w-full bg-slate-200" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-3 bg-slate-200 rounded w-1/3" />
+                    <div className="h-5 bg-slate-200 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-full" />
+                    <div className="h-10 bg-slate-200 rounded-xl w-full mt-4" />
+                  </div>
+                </div>
+              ))
+            : aparatList.map((aparat) => (
             <div
               key={aparat.id}
               className="flex-shrink-0 w-[290px] sm:w-[310px] bg-white rounded-2xl shadow-xl shadow-slate-100/50 border border-slate-100 hover:border-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-950/5 transition-all duration-300 snap-start flex flex-col justify-between group overflow-hidden"
             >
-              {/* Photo Cover Section */}
+              {/* Photo Cover Section (Full Rectangle) */}
               <div className="relative h-72 w-full bg-slate-100 overflow-hidden">
                 <Image
                   src={aparat.foto}
@@ -137,6 +214,7 @@ export default function AparatSlider({ initialData = [] }) {
                   )}
                 </button>
               </div>
+
             </div>
           ))}
         </div>
