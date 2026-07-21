@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { useMinLoading } from "@/lib/useMinLoading";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Phone, MessageSquare } from "lucide-react";
 import { aparatData as defaultAparatData } from "@/data/aparatData";
@@ -27,7 +28,7 @@ function sortAparat(data) {
 export default function AparatSlider() {
   const scrollContainerRef = useRef(null);
   const [aparatList, setAparatList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, , stopLoading] = useMinLoading(1000);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAparat, setSelectedAparat] = useState(null);
 
@@ -39,7 +40,7 @@ export default function AparatSlider() {
         const { data, timestamp } = JSON.parse(cached);
         if (data && data.length > 0) {
           setAparatList(data);
-          setLoading(false);
+          stopLoading();
           // If cache is still fresh (< 5 menit), skip re-fetch
           if (Date.now() - timestamp < CACHE_TTL) return;
         }
@@ -64,7 +65,7 @@ export default function AparatSlider() {
       } catch (err) {
         setAparatList(prev => prev.length > 0 ? prev : defaultAparatData);
       } finally {
-        setLoading(false);
+        stopLoading();
       }
     };
 

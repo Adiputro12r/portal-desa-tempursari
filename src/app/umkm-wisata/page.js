@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useMinLoading } from "@/lib/useMinLoading";
 import Image from "next/image";
 import { ShoppingBag, Compass, MapPin, MessageSquare, ExternalLink, Music, Calendar } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -68,12 +69,12 @@ export default function UmkmWisata() {
   const [activeTab, setActiveTab] = useState("semua");
   const [umkmList, setUmkmList] = useState([]);
   const [wisataList, setWisataList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, , stopLoading] = useMinLoading(1000);
 
   useEffect(() => {
     document.title = "Potensi Wisata & UMKM - Portal Desa Tempursari";
     let done = 0;
-    const onDone = () => { done++; if (done >= 2) setLoading(false); };
+    const onDone = () => { done++; if (done >= 2) stopLoading(); };
     fetchWithCache(CACHE_KEY_UMKM, "umkm", fallbackUmkm, setUmkmList, onDone);
     fetchWithCache(CACHE_KEY_WISATA, "wisata", fallbackWisata, setWisataList, onDone);
   }, []);
