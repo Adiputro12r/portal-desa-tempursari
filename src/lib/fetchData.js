@@ -57,9 +57,23 @@ export async function fetchAparat() {
 }
 
 /**
+ * Helper untuk membersihkan foto_url yang berupa Base64 raksasa di server prerender
+ * agar ukuran HTML Next.js tidak membengkak dari KB jadi MB.
+ */
+function sanitizePhotoUrl(url, fallback) {
+  if (!url) return fallback;
+  // Jika foto_url adalah string Base64 raksasa (> 2000 karakter),
+  // pakai fallback/placeholder untuk Server HTML prerender
+  if (url.startsWith("data:image/") && url.length > 2000) {
+    return fallback;
+  }
+  return url;
+}
+
+/**
  * Fetch artikel/berita dari Supabase.
  * @param {number|null} limit - Jumlah artikel. null = semua.
- * @param {boolean} includeContent - Apakah perlu menyertakan konten lengkap (default: false untuk menghemat ukuran cache)
+ * @param {boolean} includeContent - Apakah perlu menyertakan konten lengkap
  */
 export async function fetchArtikel(limit = null, includeContent = false) {
   try {
@@ -77,7 +91,10 @@ export async function fetchArtikel(limit = null, includeContent = false) {
     const { data, error } = await query;
 
     if (!error && data && data.length > 0) {
-      return data;
+      return data.map((item) => ({
+        ...item,
+        foto_url: sanitizePhotoUrl(item.foto_url, "/assets/kesenian-placeholder.svg"),
+      }));
     }
     return limit ? fallbackBerita.slice(0, limit) : fallbackBerita;
   } catch (_) {
@@ -90,6 +107,7 @@ export async function fetchArtikel(limit = null, includeContent = false) {
  * Mengembalikan object { nama, foto } atau fallback.
  */
 export async function fetchKades() {
+  const defaultFoto = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600";
   try {
     const { data, error } = await supabaseServer
       .from("pemerintah_desa")
@@ -100,16 +118,14 @@ export async function fetchKades() {
     if (!error && data && data.length > 0) {
       return {
         nama: data[0].nama || "Hajah aina",
-        foto:
-          data[0].foto_url ||
-          "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600",
+        foto: sanitizePhotoUrl(data[0].foto_url, defaultFoto),
       };
     }
   } catch (_) {}
 
   return {
     nama: "Hajah aina",
-    foto: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600",
+    foto: defaultFoto,
   };
 }
 
