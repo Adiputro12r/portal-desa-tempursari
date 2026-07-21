@@ -1,7 +1,13 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   devIndicators: {
     appIsrStatus: false,
+  },
+  images: {
+    unoptimized: true,
+    remotePatterns: [
+      { protocol: "https", hostname: "**" },
+      { protocol: "http", hostname: "**" },
+    ],
   },
 };
 
