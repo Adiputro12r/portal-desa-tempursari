@@ -117,18 +117,16 @@ export default function AparatSlider() {
               key={aparat.id}
               className="flex-shrink-0 w-[290px] sm:w-[310px] bg-white rounded-2xl shadow-xl shadow-slate-100/50 border border-slate-100 hover:border-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-950/5 transition-all duration-300 snap-start flex flex-col justify-between group overflow-hidden"
             >
-              {/* Avatar Cover Section */}
-              <div className="relative h-64 bg-slate-50 flex items-center justify-center p-6 border-b border-slate-100 group-hover:bg-emerald-50/20 transition-colors">
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-90" />
-                <div className="w-44 h-44 rounded-full border-4 border-white shadow-lg overflow-hidden relative bg-white group-hover:scale-105 transition-transform duration-300">
-                  <Image
-                    src={aparat.foto}
-                    alt={aparat.nama}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover"
-                  />
-                </div>
+              {/* Photo Cover Section (Full Rectangle) */}
+              <div className="relative h-72 w-full bg-slate-100 overflow-hidden">
+                <Image
+                  src={aparat.foto}
+                  alt={aparat.nama}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-60" />
               </div>
 
               {/* Text Info */}
