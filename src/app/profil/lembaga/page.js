@@ -69,9 +69,12 @@ export default function LembagaDesa() {
           localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         } else {
           setSections(prev => prev.length > 0 ? prev : fallback);
+          memoryCache[CACHE_KEY] = fallback;
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ data: fallback, timestamp: Date.now() }));
         }
       } catch (_) {
         setSections(prev => prev.length > 0 ? prev : fallback);
+        memoryCache[CACHE_KEY] = fallback;
       } finally {
         setLoading(false);
       }
