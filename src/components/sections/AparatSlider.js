@@ -31,13 +31,15 @@ export default function AparatSlider() {
     // Coba dari memory cache dulu (antar-navigasi SPA)
     if (memoryCache[CACHE_KEY]) return memoryCache[CACHE_KEY];
     // Lalu coba localStorage (setelah refresh, baca langsung tanpa delay)
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const { data } = JSON.parse(cached);
-        if (data?.length > 0) return data;
-      }
-    } catch (_) {}
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { data } = JSON.parse(cached);
+          if (data?.length > 0) return data;
+        }
+      } catch (_) {}
+    }
     // Fallback ke data bawaan
     return defaultAparatData;
   });

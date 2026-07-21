@@ -23,6 +23,7 @@ function parseFirstImage(foto_url) {
 
 function initFromCache(cacheKey, fallback) {
   if (memoryCache[cacheKey]) return memoryCache[cacheKey];
+  if (typeof window === "undefined") return fallback; // SSR guard
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) {

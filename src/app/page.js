@@ -15,6 +15,7 @@ const KADES_CACHE_TTL = 5 * 60 * 1000; // 5 menit
 
 function initFromCache(cacheKey, fallback) {
   if (memoryCache[cacheKey]) return memoryCache[cacheKey];
+  if (typeof window === "undefined") return fallback; // SSR guard
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
@@ -27,7 +28,7 @@ function initFromCache(cacheKey, fallback) {
 
 export default function Home() {
   const [kadesInfo, setKadesInfo] = useState(() => initFromCache(KADES_CACHE_KEY, { nama: "Hajah aina", foto: "/assets/avatar-kades.svg" }));
-  const [kadesLoaded, setKadesLoaded] = useState(() => !!memoryCache[KADES_CACHE_KEY] || !!localStorage.getItem?.(KADES_CACHE_KEY));
+  const [kadesLoaded, setKadesLoaded] = useState(() => !!memoryCache[KADES_CACHE_KEY]);
   const [recentArticles, setRecentArticles] = useState(() => initFromCache("recent_articles", null) || beritaData.slice(0, 3));
 
   useEffect(() => {
