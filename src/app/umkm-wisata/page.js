@@ -61,14 +61,10 @@ async function fetchWithCache(cacheKey, supabaseTable, fallback, setter, setLoad
       memoryCache[cacheKey] = data;
       localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
     } else {
-      const fallbackData = prev => prev?.length > 0 ? prev : fallback;
-      setter(fallbackData);
-      memoryCache[cacheKey] = fallback;
-      localStorage.setItem(cacheKey, JSON.stringify({ data: fallback, timestamp: Date.now() }));
+      setter(prev => prev?.length > 0 ? prev : fallback);
     }
   } catch (_) {
     setter(prev => prev?.length > 0 ? prev : fallback);
-    memoryCache[cacheKey] = fallback;
   } finally {
     setLoading && setLoading(false);
   }
