@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 import Link from "next/link";
 import Image from "next/image";
-import { Newspaper, Calendar, ArrowRight, User } from "lucide-react";
+import { Newspaper, Calendar, ArrowRight, User, Search, BookOpen } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { memoryCache } from "@/lib/memoryCache";
 import { beritaData as fallbackData } from "@/data/beritaData";
