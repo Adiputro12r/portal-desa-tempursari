@@ -9,7 +9,8 @@ import { supabase } from "@/lib/supabase";
 
 export default function AparatSlider() {
   const scrollContainerRef = useRef(null);
-  const [aparatList, setAparatList] = useState(defaultAparatData);
+  const [aparatList, setAparatList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAparat, setSelectedAparat] = useState(null);
 
@@ -36,9 +37,13 @@ export default function AparatSlider() {
             hasWhatsapp: item.hasWhatsapp ?? (item.kontak ? item.kontak.startsWith("+") : true),
           }));
           setAparatList(formatted);
+        } else {
+          setAparatList(defaultAparatData);
         }
       } catch (err) {
-        // keep default
+        setAparatList(defaultAparatData);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -112,7 +117,22 @@ export default function AparatSlider() {
           ref={scrollContainerRef}
           className="flex space-x-6 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-smooth px-1"
         >
-          {aparatList.map((aparat) => (
+          {loading
+            ? [1, 2, 3, 4].map((n) => (
+                <div
+                  key={n}
+                  className="flex-shrink-0 w-[290px] sm:w-[310px] bg-white rounded-2xl border border-slate-100 p-0 overflow-hidden shadow-lg animate-pulse"
+                >
+                  <div className="h-72 w-full bg-slate-200" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-3 bg-slate-200 rounded w-1/3" />
+                    <div className="h-5 bg-slate-200 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-full" />
+                    <div className="h-10 bg-slate-200 rounded-xl w-full mt-4" />
+                  </div>
+                </div>
+              ))
+            : aparatList.map((aparat) => (
             <div
               key={aparat.id}
               className="flex-shrink-0 w-[290px] sm:w-[310px] bg-white rounded-2xl shadow-xl shadow-slate-100/50 border border-slate-100 hover:border-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-950/5 transition-all duration-300 snap-start flex flex-col justify-between group overflow-hidden"
