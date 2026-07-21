@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ImageIcon } from "lucide-react";
 
 /**
  * ImageWithLoading — Next.js Image wrapper dengan skeleton "Memuat foto..."
@@ -30,17 +29,31 @@ export default function ImageWithLoading({
 
   return (
     <div className={`relative w-full h-full ${wrapperClassName}`}>
-      {/* Skeleton shown while image is loading */}
+      {/* Shimmer skeleton while loading */}
       {!loaded && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse">
-          <div className="p-3 bg-white/60 rounded-2xl shadow-sm">
-            <ImageIcon className="w-7 h-7 text-slate-300" />
-          </div>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-            {skeletonText}
-          </span>
+        <div className="absolute inset-0 z-10 overflow-hidden bg-slate-200">
+          <div className="shimmer-wave" />
         </div>
       )}
+
+      <style>{`
+        .shimmer-wave {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            90deg,
+            rgba(226,232,240,0) 0%,
+            rgba(241,245,249,0.9) 50%,
+            rgba(226,232,240,0) 100%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.4s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
 
       {/* Actual image — invisible until loaded */}
       {fill ? (
