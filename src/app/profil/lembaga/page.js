@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Landmark, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { memoryCache } from "@/lib/memoryCache";
 import { lembagaData as fallback } from "@/data/demografiData";
 
 const CACHE_KEY = "lembaga_desa_cache";
@@ -35,8 +36,8 @@ function SectionSkeleton() {
 }
 
 export default function LembagaDesa() {
-  const [sections, setSections] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [sections, setSections] = useState(() => memoryCache[CACHE_KEY] || []);
+  const [loading, setLoading] = useState(() => !memoryCache[CACHE_KEY]);
 
   useEffect(() => {
     document.title = "Lembaga Desa - Portal Desa Tempursari";
@@ -48,7 +49,10 @@ export default function LembagaDesa() {
         if (data?.length > 0) {
           setSections(data);
           setLoading(false);
-          if (Date.now() - timestamp < CACHE_TTL) return;
+          if (Date.now() - timestamp < CACHE_TTL) {
+            memoryCache[CACHE_KEY] = data;
+            return;
+          }
         }
       }
     } catch (_) {}
@@ -61,6 +65,7 @@ export default function LembagaDesa() {
           .order("created_at", { ascending: true });
         if (!error && data?.length > 0) {
           setSections(data);
+          memoryCache[CACHE_KEY] = data;
           localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         } else {
           setSections(prev => prev.length > 0 ? prev : fallback);

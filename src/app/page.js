@@ -8,15 +8,16 @@ import HeroSection from "@/components/sections/HeroSection";
 import AparatSlider from "@/components/sections/AparatSlider";
 import { beritaData } from "@/data/beritaData";
 import { supabase } from "@/lib/supabase";
+import { memoryCache } from "@/lib/memoryCache";
 
 const KADES_CACHE_KEY = "kades_info_cache";
 const KADES_CACHE_TTL = 5 * 60 * 1000; // 5 menit
 
 export default function Home() {
-  const [kadesInfo, setKadesInfo] = useState(null); // null = still loading from cache
-  const [kadesLoaded, setKadesLoaded] = useState(false);
-  const [recentArticles, setRecentArticles] = useState([]);
-  const [loadingArticles, setLoadingArticles] = useState(true);
+  const [kadesInfo, setKadesInfo] = useState(() => memoryCache[KADES_CACHE_KEY] || null);
+  const [kadesLoaded, setKadesLoaded] = useState(() => !!memoryCache[KADES_CACHE_KEY]);
+  const [recentArticles, setRecentArticles] = useState(() => memoryCache["recent_articles"] || []);
+  const [loadingArticles, setLoadingArticles] = useState(() => !memoryCache["recent_articles"]);
 
   useEffect(() => {
     // Step 1: Load from cache instantly
@@ -27,7 +28,10 @@ export default function Home() {
         if (data) {
           setKadesInfo(data);
           setKadesLoaded(true);
-          if (Date.now() - timestamp < KADES_CACHE_TTL) return;
+          if (Date.now() - timestamp < KADES_CACHE_TTL) {
+            memoryCache[KADES_CACHE_KEY] = data;
+            return;
+          }
         }
       }
     } catch (_) {}
@@ -47,6 +51,7 @@ export default function Home() {
             foto: data[0].foto_url || "/assets/avatar-kades.svg",
           };
           setKadesInfo(info);
+          memoryCache[KADES_CACHE_KEY] = info;
           localStorage.setItem(KADES_CACHE_KEY, JSON.stringify({ data: info, timestamp: Date.now() }));
         } else if (!kadesLoaded) {
           setKadesInfo({ nama: "Hajah aina", foto: "/assets/avatar-kades.svg" });
@@ -67,8 +72,10 @@ export default function Home() {
           .limit(3);
         if (data && data.length > 0) {
           setRecentArticles(data);
+          memoryCache["recent_articles"] = data;
         } else {
           setRecentArticles(beritaData.slice(0, 3));
+          memoryCache["recent_articles"] = beritaData.slice(0, 3);
         }
       } catch (err) {
         setRecentArticles(beritaData.slice(0, 3));

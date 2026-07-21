@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ShoppingBag, Compass, MapPin, MessageSquare, ExternalLink, Music, Calendar } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { memoryCache } from "@/lib/memoryCache";
 import { umkmData as fallbackUmkm, wisataData as fallbackWisata, kesenianData as fallbackKesenian } from "@/data/umkmWisataData";
 
 const CACHE_KEY_UMKM = "umkm_list_cache";
@@ -44,7 +45,10 @@ async function fetchWithCache(cacheKey, supabaseTable, fallback, setter, setLoad
       if (data?.length > 0) {
         setter(data);
         setLoading && setLoading(false);
-        if (Date.now() - timestamp < CACHE_TTL) return;
+        if (Date.now() - timestamp < CACHE_TTL) {
+          memoryCache[cacheKey] = data;
+          return;
+        }
       }
     }
   } catch (_) {}
@@ -54,6 +58,7 @@ async function fetchWithCache(cacheKey, supabaseTable, fallback, setter, setLoad
     const { data, error } = await supabase.from(supabaseTable).select("*").order("created_at", { ascending: false });
     if (!error && data?.length > 0) {
       setter(data);
+      memoryCache[cacheKey] = data;
       localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
     } else {
       setter(prev => prev?.length > 0 ? prev : fallback);
@@ -67,9 +72,9 @@ async function fetchWithCache(cacheKey, supabaseTable, fallback, setter, setLoad
 
 export default function UmkmWisata() {
   const [activeTab, setActiveTab] = useState("semua");
-  const [umkmList, setUmkmList] = useState([]);
-  const [wisataList, setWisataList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [umkmList, setUmkmList] = useState(() => memoryCache[CACHE_KEY_UMKM] || []);
+  const [wisataList, setWisataList] = useState(() => memoryCache[CACHE_KEY_WISATA] || []);
+  const [loading, setLoading] = useState(() => !(memoryCache[CACHE_KEY_UMKM] && memoryCache[CACHE_KEY_WISATA]));
 
   useEffect(() => {
     document.title = "Potensi Wisata & UMKM - Portal Desa Tempursari";

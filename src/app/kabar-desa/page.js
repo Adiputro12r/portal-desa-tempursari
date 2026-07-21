@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 
 import Link from "next/link";
 import Image from "next/image";
-import { BookOpen, Calendar, Search, Newspaper } from "lucide-react";
+import { Newspaper, Calendar, ArrowRight, User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { memoryCache } from "@/lib/memoryCache";
 import { beritaData as fallbackData } from "@/data/beritaData";
 
 const CACHE_KEY = "kabar_desa_list_cache";
@@ -36,8 +37,8 @@ function BeritaSkeleton() {
 }
 
 export default function KabarDesa() {
-  const [beritaList, setBeritaList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [beritaList, setBeritaList] = useState(() => memoryCache[CACHE_KEY] || []);
+  const [loading, setLoading] = useState(() => !memoryCache[CACHE_KEY]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
 
@@ -52,7 +53,10 @@ export default function KabarDesa() {
         if (data?.length > 0) {
           setBeritaList(data);
           setLoading(false);
-          if (Date.now() - timestamp < CACHE_TTL) return;
+          if (Date.now() - timestamp < CACHE_TTL) {
+            memoryCache[CACHE_KEY] = data;
+            return;
+          }
         }
       }
     } catch (_) {}
@@ -66,6 +70,7 @@ export default function KabarDesa() {
           .order("created_at", { ascending: false });
         if (!error && data?.length > 0) {
           setBeritaList(data);
+          memoryCache[CACHE_KEY] = data;
           localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         } else {
           setBeritaList(prev => prev.length > 0 ? prev : fallbackData);

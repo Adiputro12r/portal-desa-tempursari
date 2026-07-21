@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Calendar, User, ChevronRight, Share2, Check, ChevronLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { memoryCache } from "@/lib/memoryCache";
 
 function parseImages(foto_url) {
   if (!foto_url) return [];
@@ -75,9 +76,9 @@ export default function DetailBerita({ params }) {
   const id = unwrappedParams?.id;
   const router = useRouter();
 
-  const [artikel, setArtikel] = useState(null);
-  const [recommendations, setRecommendations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [artikel, setArtikel] = useState(() => memoryCache[`artikel_${id}`] || null);
+  const [recommendations, setRecommendations] = useState(() => memoryCache[`rekomendasi_${id}`] || []);
+  const [loading, setLoading] = useState(() => !memoryCache[`artikel_${id}`]);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -90,9 +91,13 @@ export default function DetailBerita({ params }) {
         ]);
         if (artikelData) {
           setArtikel(artikelData);
+          memoryCache[`artikel_${id}`] = artikelData;
           document.title = `${artikelData.judul} - Portal Desa Tempursari`;
         }
-        if (recData) setRecommendations(recData);
+        if (recData) {
+          setRecommendations(recData);
+          memoryCache[`rekomendasi_${id}`] = recData;
+        }
       } catch (_) {}
       finally { setLoading(false); }
     };

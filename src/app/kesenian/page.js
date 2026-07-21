@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Music, Calendar, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { memoryCache } from "@/lib/memoryCache";
 import { kesenianData as fallbackKesenian } from "@/data/umkmWisataData";
 
 const CACHE_KEY = "kesenian_list_cache";
@@ -34,8 +35,8 @@ function CardSkeleton() {
 }
 
 export default function KesenianDaerah() {
-  const [kesenianList, setKesenianList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [kesenianList, setKesenianList] = useState(() => memoryCache[CACHE_KEY] || []);
+  const [loading, setLoading] = useState(() => !memoryCache[CACHE_KEY]);
 
   useEffect(() => {
     document.title = "Kesenian & Budaya - Portal Desa Tempursari";
@@ -47,7 +48,10 @@ export default function KesenianDaerah() {
         if (data?.length > 0) {
           setKesenianList(data);
           setLoading(false);
-          if (Date.now() - timestamp < CACHE_TTL) return;
+          if (Date.now() - timestamp < CACHE_TTL) {
+            memoryCache[CACHE_KEY] = data;
+            return;
+          }
         }
       }
     } catch (_) {}
@@ -57,6 +61,7 @@ export default function KesenianDaerah() {
         const { data, error } = await supabase.from("kesenian").select("*").order("created_at", { ascending: false });
         if (!error && data?.length > 0) {
           setKesenianList(data);
+          memoryCache[CACHE_KEY] = data;
           localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         } else {
           setKesenianList(prev => prev.length > 0 ? prev : fallbackKesenian);

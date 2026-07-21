@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-
+import { memoryCache } from "@/lib/memoryCache";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Phone, MessageSquare } from "lucide-react";
 import { aparatData as defaultAparatData } from "@/data/aparatData";
@@ -27,8 +27,8 @@ function sortAparat(data) {
 
 export default function AparatSlider() {
   const scrollContainerRef = useRef(null);
-  const [aparatList, setAparatList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [aparatList, setAparatList] = useState(() => memoryCache[CACHE_KEY] || []);
+  const [loading, setLoading] = useState(() => !memoryCache[CACHE_KEY]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAparat, setSelectedAparat] = useState(null);
 
@@ -42,7 +42,10 @@ export default function AparatSlider() {
           setAparatList(data);
           setLoading(false);
           // If cache is still fresh (< 5 menit), skip re-fetch
-          if (Date.now() - timestamp < CACHE_TTL) return;
+          if (Date.now() - timestamp < CACHE_TTL) {
+            memoryCache[CACHE_KEY] = data; // Simpan ke memory
+            return;
+          }
         }
       }
     } catch (_) {}
@@ -58,6 +61,7 @@ export default function AparatSlider() {
           const formatted = sortAparat(data);
           setAparatList(formatted);
           // Save to cache
+          memoryCache[CACHE_KEY] = formatted;
           localStorage.setItem(CACHE_KEY, JSON.stringify({ data: formatted, timestamp: Date.now() }));
         } else {
           setAparatList(prev => prev.length > 0 ? prev : defaultAparatData);
