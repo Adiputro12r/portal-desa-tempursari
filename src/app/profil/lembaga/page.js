@@ -1,134 +1,148 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Landmark, ShieldCheck } from "lucide-react";
-import { lembagaData } from "@/data/demografiData";
+import { Landmark, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { lembagaData as fallback } from "@/data/demografiData";
 
-export const metadata = {
-  title: "Lembaga Desa - Portal Desa Tempursari",
-  description: "Daftar lembaga kemasyarakatan resmi Desa Tempursari seperti PKK, LPMD, dan Karang Taruna.",
-};
+const CACHE_KEY = "lembaga_desa_cache";
+const CACHE_TTL = 5 * 60 * 1000;
 
-const lembagaDetail = {
-  "lembaga-1": {
-    ketua: "Bpk. Sumarno",
-    tahunBerdiri: "2010",
-    program: ["Musyawarah Perencanaan Desa", "Gotong Royong Lingkungan", "Pembangunan Infrastruktur Swadaya"],
-    color: "emerald",
-  },
-  "lembaga-2": {
-    ketua: "Ibu Sri Wahyuni, S.E.",
-    tahunBerdiri: "2005",
-    program: ["Penyuluhan Gizi dan Kesehatan", "Kegiatan PKK Rutin", "Pengembangan UPPKS"],
-    color: "rose",
-  },
-  "lembaga-3": {
-    ketua: "Sdr. Rizky Pratama",
-    tahunBerdiri: "2015",
-    program: ["Kegiatan Olahraga Pemuda", "Pentas Seni & Kesenian", "Bakti Sosial Masyarakat"],
-    color: "amber",
-  },
-};
+function parseFirstImage(foto_url) {
+  if (!foto_url) return null;
+  try {
+    const arr = JSON.parse(foto_url);
+    if (Array.isArray(arr) && arr.length > 0) return arr[0];
+  } catch (_) {}
+  return foto_url;
+}
 
-const colorMap = {
-  emerald: {
-    badge: "bg-emerald-50 text-emerald-700 border-emerald-100",
-    tag: "bg-emerald-100 text-emerald-800",
-    border: "hover:border-emerald-400/30",
-  },
-  rose: {
-    badge: "bg-rose-50 text-rose-700 border-rose-100",
-    tag: "bg-rose-100 text-rose-800",
-    border: "hover:border-rose-400/30",
-  },
-  amber: {
-    badge: "bg-amber-50 text-amber-700 border-amber-100",
-    tag: "bg-amber-100 text-amber-800",
-    border: "hover:border-amber-400/30",
-  },
-};
+function SectionSkeleton() {
+  return (
+    <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden animate-pulse space-y-0">
+      <div className="h-72 bg-slate-200" />
+      <div className="p-8 space-y-4">
+        <div className="h-6 bg-slate-200 rounded w-1/2" />
+        <div className="h-3 bg-slate-100 rounded w-full" />
+        <div className="h-3 bg-slate-100 rounded w-5/6" />
+        <div className="h-3 bg-slate-100 rounded w-4/5" />
+      </div>
+    </div>
+  );
+}
 
 export default function LembagaDesa() {
+  const [sections, setSections] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    document.title = "Lembaga Desa - Portal Desa Tempursari";
+
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (data?.length > 0) {
+          setSections(data);
+          setLoading(false);
+          if (Date.now() - timestamp < CACHE_TTL) return;
+        }
+      }
+    } catch (_) {}
+
+    const fetchData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("lembaga_desa")
+          .select("*")
+          .order("created_at", { ascending: true });
+        if (!error && data?.length > 0) {
+          setSections(data);
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+        } else {
+          setSections(prev => prev.length > 0 ? prev : fallback);
+        }
+      } catch (_) {
+        setSections(prev => prev.length > 0 ? prev : fallback);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <div className="pt-28 pb-20 bg-slate-50 min-h-screen">
-      {/* Page Header Banner */}
+      {/* Header */}
       <section className="bg-gradient-to-r from-emerald-900 to-green-800 py-16 text-white mb-12 shadow-md relative overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-10" style={{ backgroundImage: "url('/assets/kesenian-placeholder.svg')" }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center space-y-3">
           <Landmark className="w-12 h-12 text-emerald-400 mx-auto" />
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight">Lembaga Kemasyarakatan Desa</h1>
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight">Lembaga Desa Tempursari</h1>
           <p className="text-emerald-100 max-w-xl mx-auto text-sm md:text-base font-medium">
-            Mengenal organisasi sosial dan wadah aspirasi gotong-royong warga di Desa Tempursari.
+            Mengenal lembaga-lembaga kemasyarakatan dan pemerintahan yang aktif di Desa Tempursari.
           </p>
         </div>
       </section>
 
-      {/* Main Grid content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="space-y-8">
-          {lembagaData.map((lembaga) => {
-            const detail = lembagaDetail[lembaga.id];
-            const c = colorMap[detail?.color] || colorMap.emerald;
+      {/* Breadcrumb */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <nav className="flex items-center space-x-2 text-xs font-semibold text-slate-400">
+          <Link href="/" className="hover:text-emerald-700 transition-colors">Beranda</Link>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-slate-600">Lembaga Desa</span>
+        </nav>
+      </div>
 
+      {/* Content Sections */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+        {loading ? (
+          [1, 2].map(i => <SectionSkeleton key={i} />)
+        ) : (
+          sections.map((section, idx) => {
+            const img = parseFirstImage(section.foto_url || section.logo_url);
+            const content = section.deskripsi || section.konten || "";
+            const isHtml = content.includes("<");
             return (
-              <div
-                key={lembaga.id}
-                className={`bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-100/50 p-6 md:p-8 flex flex-col gap-6 transition-all duration-300 group hover:shadow-2xl ${c.border}`}
-              >
-                {/* Top row: Logo + Name + Description */}
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                  {/* Logo */}
-                  <div className="relative w-24 h-24 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 p-3 group-hover:scale-105 transition-transform duration-300">
+              <div key={section.id || idx} className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-100/30 overflow-hidden">
+                {/* Photo */}
+                {img && (
+                  <div className="relative w-full" style={{ aspectRatio: img.startsWith("data:image/svg") ? "16/7" : "16/9", maxHeight: "480px", overflow: "hidden" }}>
                     <Image
-                      src={lembaga.logo_url}
-                      alt={lembaga.nama_lembaga}
+                      src={img}
+                      alt={section.nama_lembaga || "Lembaga Desa"}
                       fill
-                      className="object-contain p-4"
+                      className="object-contain bg-slate-50"
                     />
                   </div>
-
-                  {/* Name + Badge + Description */}
-                  <div className="space-y-3 text-center md:text-left flex-grow">
-                    <div className="flex flex-col md:flex-row md:items-center gap-2">
-                      <h3 className="font-extrabold text-lg text-slate-800 tracking-tight group-hover:text-emerald-700 transition-colors">
-                        {lembaga.nama_lembaga}
-                      </h3>
-                      <span className={`inline-flex self-center md:self-start items-center space-x-1 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest border ${c.badge}`}>
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                        <span>Lembaga Resmi</span>
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                      {lembaga.deskripsi}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Bottom: Details grid */}
-                {detail && (
-                  <div className="border-t border-slate-100 pt-5 grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ketua</p>
-                      <p className="font-bold text-slate-700">{detail.ketua}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Berdiri Sejak</p>
-                      <p className="font-bold text-slate-700">{detail.tahunBerdiri}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Program Unggulan</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {detail.program.map((prog, i) => (
-                          <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${c.tag}`}>
-                            {prog}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
                 )}
+
+                {/* Text content */}
+                <div className="p-8 md:p-12">
+                  <h2 className="text-2xl font-extrabold text-slate-800 mb-4">
+                    {section.nama_lembaga || section.judul || "Lembaga Desa"}
+                  </h2>
+
+                  {isHtml ? (
+                    <div
+                      className="text-slate-600 text-sm md:text-base leading-relaxed
+                        [&_h2]:text-xl [&_h2]:font-extrabold [&_h2]:text-slate-800 [&_h2]:mt-6 [&_h2]:mb-3
+                        [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-slate-700 [&_h3]:mt-4 [&_h3]:mb-2
+                        [&_strong]:font-bold [&_em]:italic
+                        [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ul]:my-3
+                        [&_hr]:border-slate-200 [&_hr]:my-6
+                        [&_p]:mb-4"
+                      dangerouslySetInnerHTML={{ __html: content }}
+                    />
+                  ) : (
+                    <p className="text-slate-600 text-sm md:text-base leading-relaxed">{content}</p>
+                  )}
+                </div>
               </div>
             );
-          })}
-        </div>
+          })
+        )}
       </div>
     </div>
   );

@@ -4,14 +4,34 @@ import { useEffect, useState } from "react";
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { Users, BarChart3, PieChartIcon, TrendingUp } from "lucide-react";
 import { pekerjaanData, pendidikanData, usiaData } from "@/data/demografiData";
+import { supabase } from "@/lib/supabase";
 
 export default function DemografiPenduduk() {
   const [mounted, setMounted] = useState(false);
+  const [pekerjaanList, setPekerjaanList] = useState(pekerjaanData);
+  const [pendidikanList, setPendidikanList] = useState(pendidikanData);
+  const [usiaList, setUsiaList] = useState(usiaData);
 
   useEffect(() => {
     setMounted(true);
     document.title = "Demografi Kependudukan - Portal Desa Tempursari";
+
+    const fetchDemografi = async () => {
+      try {
+        const { data, error } = await supabase.from("demografi_desa").select("*");
+        if (!error && data?.length > 0) {
+          const pek = data.filter(d => d.kategori === "Pekerjaan").map(d => ({ name: d.nama, value: d.jumlah }));
+          const pend = data.filter(d => d.kategori === "Pendidikan").map(d => ({ name: d.nama, value: d.jumlah }));
+          const usia = data.filter(d => d.kategori === "Usia").map(d => ({ name: d.nama, value: d.jumlah }));
+          if (pek.length > 0) setPekerjaanList(pek);
+          if (pend.length > 0) setPendidikanList(pend);
+          if (usia.length > 0) setUsiaList(usia);
+        }
+      } catch (_) {}
+    };
+    fetchDemografi();
   }, []);
+
 
 
   // Palette colors for Pie Cells
@@ -60,7 +80,7 @@ export default function DemografiPenduduk() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={pekerjaanData}
+                        data={pekerjaanList}
                         cx="50%"
                         cy="50%"
                         innerRadius={60}
@@ -68,7 +88,7 @@ export default function DemografiPenduduk() {
                         paddingAngle={4}
                         dataKey="value"
                       >
-                        {pekerjaanData.map((entry, index) => (
+                        {pekerjaanList.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -102,7 +122,7 @@ export default function DemografiPenduduk() {
 
                 <div className="h-72 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <RechartsBarChart data={pendidikanData} layout="vertical">
+                    <RechartsBarChart data={pendidikanList} layout="vertical">
                       <XAxis type="number" hide />
                       <YAxis dataKey="name" type="category" width={110} axisLine={false} tickLine={false} style={{ fontSize: '10px', fontWeight: 'bold', fill: '#64748b' }} />
                       <Tooltip 
@@ -130,13 +150,13 @@ export default function DemografiPenduduk() {
 
               <div className="h-80 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RechartsBarChart data={usiaData}>
-                    <XAxis dataKey="range" axisLine={false} tickLine={false} style={{ fontSize: '10px', fontWeight: 'bold', fill: '#64748b' }} />
+                  <RechartsBarChart data={usiaList}>
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} style={{ fontSize: '10px', fontWeight: 'bold', fill: '#64748b' }} />
                     <YAxis axisLine={false} tickLine={false} style={{ fontSize: '10px', fontWeight: 'bold', fill: '#64748b' }} />
                     <Tooltip 
                       contentStyle={{ backgroundColor: "#1e293b", color: "#fff", borderRadius: "8px", fontSize: "12px", border: "none" }}
                     />
-                    <Bar dataKey="jumlah" fill="#f59e0b" radius={[8, 8, 0, 0]} barSize={36} />
+                    <Bar dataKey="value" fill="#f59e0b" radius={[8, 8, 0, 0]} barSize={36} />
                   </RechartsBarChart>
                 </ResponsiveContainer>
               </div>

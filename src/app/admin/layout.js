@@ -14,7 +14,9 @@ import {
   LayoutDashboard, 
   ShieldCheck,
   Menu,
-  X
+  X,
+  Landmark,
+  BarChart3
 } from "lucide-react";
 
 export default function AdminLayout({ children }) {
@@ -62,6 +64,8 @@ export default function AdminLayout({ children }) {
     { name: "Kelola Wisata", href: "/admin/wisata", icon: Compass },
     { name: "Kelola Kesenian", href: "/admin/kesenian", icon: Sparkles },
     { name: "Kelola Pemerintah", href: "/admin/pemerintah", icon: Users },
+    { name: "Kelola Lembaga", href: "/admin/lembaga", icon: Landmark },
+    { name: "Kelola Demografi", href: "/admin/demografi", icon: BarChart3 },
   ];
 
   if (loading) {
