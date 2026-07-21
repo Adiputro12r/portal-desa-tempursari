@@ -1,27 +1,92 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import ImageWithLoading from "@/components/ui/ImageWithLoading";
 import { ChevronLeft, ChevronRight, Phone, MessageSquare } from "lucide-react";
 import ModalPhone from "@/components/ui/ModalPhone";
 import { memoryCache } from "@/lib/memoryCache";
+import { aparatData as defaultAparatData } from "@/data/aparatData";
+import { supabase } from "@/lib/supabase";
 
 const CACHE_KEY = "aparat_desa_cache_v2";
+const CACHE_TTL = 5 * 60 * 1000;
+
+function sortAparat(data) {
+  return [...data]
+    .sort((a, b) => {
+      const isKadesA =
+        a.jabatan?.toLowerCase().includes("kepala desa") ||
+        a.jabatan?.toLowerCase() === "kades";
+      const isKadesB =
+        b.jabatan?.toLowerCase().includes("kepala desa") ||
+        b.jabatan?.toLowerCase() === "kades";
+      if (isKadesA && !isKadesB) return -1;
+      if (!isKadesA && isKadesB) return 1;
+      return (a.urutan ?? 0) - (b.urutan ?? 0);
+    })
+    .map((item) => ({
+      ...item,
+      foto: item.foto_url || item.foto || "/assets/avatar-kades.svg",
+      hasWhatsapp:
+        item.hasWhatsapp ?? (item.kontak ? item.kontak.startsWith("+") : true),
+    }));
+}
 
 /**
- * AparatSliderClient — komponen interaktif untuk slider aparat desa.
- * Menerima `initialData` dari Server Component AparatSlider.js.
- * Tidak perlu fetch data sendiri — data sudah dari server.
+ * AparatSliderClient — Client Component.
+ * Diinisialisasi sinkron dari memoryCache / localStorage / initialData.
+ * Gambar Base64 tidak ikut tertanam di server HTML index.html (sehingga bebas error ISR 54MB),
+ * tapi di browser LANGSUNG TAMPIL INSTAN (0 detik) dari memoryCache/localStorage!
  */
 export default function AparatSliderClient({ initialData = [] }) {
   const scrollContainerRef = useRef(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAparat, setSelectedAparat] = useState(null);
 
-  // Simpan ke memoryCache agar prefetcher tidak perlu fetch ulang
-  if (initialData.length > 0 && !memoryCache[CACHE_KEY]) {
-    memoryCache[CACHE_KEY] = initialData;
-  }
+  const [aparatList, setAparatList] = useState(() => {
+    if (initialData && initialData.length > 0) return initialData;
+    if (memoryCache[CACHE_KEY]) return memoryCache[CACHE_KEY];
+    try {
+      const cached = typeof window !== "undefined" ? localStorage.getItem(CACHE_KEY) : null;
+      if (cached) {
+        const { data } = JSON.parse(cached);
+        if (data?.length > 0) return data;
+      }
+    } catch (_) {}
+    return defaultAparatData;
+  });
+
+  useEffect(() => {
+    // Background fetch sync jika cache belum ada / butuh refresh
+    const fetchAparat = async () => {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (data?.length > 0) {
+            setAparatList(data);
+            memoryCache[CACHE_KEY] = data;
+            if (Date.now() - timestamp < CACHE_TTL) return;
+          }
+        }
+      } catch (_) {}
+
+      try {
+        const { data, error } = await supabase.from("pemerintah_desa").select("*");
+        if (!error && data && data.length > 0) {
+          const formatted = sortAparat(data);
+          setAparatList(formatted);
+          memoryCache[CACHE_KEY] = formatted;
+          localStorage.setItem(
+            CACHE_KEY,
+            JSON.stringify({ data: formatted, timestamp: Date.now() })
+          );
+        }
+      } catch (_) {}
+    };
+
+    fetchAparat();
+  }, []);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -37,7 +102,7 @@ export default function AparatSliderClient({ initialData = [] }) {
 
   const handleContactClick = (aparat) => {
     if (aparat.hasWhatsapp) {
-      const cleanPhone = aparat.kontak.replace("+", "");
+      const cleanPhone = (aparat.kontak || "").replace("+", "");
       window.open(
         `https://wa.me/${cleanPhone}?text=Halo%20Pak/Bu%20${aparat.nama},%20saya%20ingin%20bertanya%20mengenai%20layanan%20desa.`,
         "_blank"
@@ -91,7 +156,7 @@ export default function AparatSliderClient({ initialData = [] }) {
           ref={scrollContainerRef}
           className="flex space-x-6 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-smooth px-1"
         >
-          {initialData.map((aparat) => (
+          {aparatList.map((aparat) => (
             <div
               key={aparat.id}
               className="flex-shrink-0 w-[290px] sm:w-[310px] bg-white rounded-2xl shadow-xl shadow-slate-100/50 border border-slate-100 hover:border-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-950/5 transition-all duration-300 snap-start flex flex-col justify-between group overflow-hidden"
