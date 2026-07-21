@@ -1,15 +1,40 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Phone, MessageSquare } from "lucide-react";
-import { aparatData } from "@/data/aparatData";
+import { aparatData as defaultAparatData } from "@/data/aparatData";
 import ModalPhone from "@/components/ui/ModalPhone";
+import { supabase } from "@/lib/supabase";
 
 export default function AparatSlider() {
   const scrollContainerRef = useRef(null);
+  const [aparatList, setAparatList] = useState(defaultAparatData);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAparat, setSelectedAparat] = useState(null);
+
+  useEffect(() => {
+    const fetchAparat = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("pemerintah_desa")
+          .select("*");
+
+        if (!error && data && data.length > 0) {
+          const formatted = data.map((item) => ({
+            ...item,
+            foto: item.foto_url || item.foto || "/assets/avatar-kades.svg",
+            hasWhatsapp: item.hasWhatsapp ?? (item.kontak ? item.kontak.startsWith("+") : true),
+          }));
+          setAparatList(formatted);
+        }
+      } catch (err) {
+        // keep default
+      }
+    };
+
+    fetchAparat();
+  }, []);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -78,7 +103,7 @@ export default function AparatSlider() {
           ref={scrollContainerRef}
           className="flex space-x-6 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-smooth px-1"
         >
-          {aparatData.map((aparat) => (
+          {aparatList.map((aparat) => (
             <div
               key={aparat.id}
               className="flex-shrink-0 w-[290px] sm:w-[310px] bg-white rounded-2xl shadow-xl shadow-slate-100/50 border border-slate-100 hover:border-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-950/5 transition-all duration-300 snap-start flex flex-col justify-between group overflow-hidden"

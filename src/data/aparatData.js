@@ -1,7 +1,7 @@
 export const aparatData = [
   {
     id: 1,
-    nama: "H. Joko Susilo, S.P.",
+    nama: "Hajah aina",
     jabatan: "Kepala Desa",
     hasWhatsapp: true,
     kontak: "+6281234567890",

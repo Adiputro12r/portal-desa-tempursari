@@ -1,11 +1,42 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, BookOpen, Calendar, MapPin, Award, Users, Landmark } from "lucide-react";
 import HeroSection from "@/components/sections/HeroSection";
 import AparatSlider from "@/components/sections/AparatSlider";
 import { beritaData } from "@/data/beritaData";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
+  const [kadesInfo, setKadesInfo] = useState({
+    nama: "Hajah aina",
+    foto: "/assets/avatar-kades.svg",
+  });
+
+  useEffect(() => {
+    const fetchKades = async () => {
+      try {
+        const { data } = await supabase
+          .from("pemerintah_desa")
+          .select("*")
+          .ilike("jabatan", "%Kepala Desa%")
+          .limit(1);
+
+        if (data && data.length > 0) {
+          setKadesInfo({
+            nama: data[0].nama || "Hajah aina",
+            foto: data[0].foto_url || "/assets/avatar-kades.svg",
+          });
+        }
+      } catch (err) {
+        // fallback
+      }
+    };
+    fetchKades();
+  }, []);
+
   // Take top 3 articles for landing page preview
   const recentArticles = beritaData.slice(0, 3);
 
@@ -54,14 +85,14 @@ export default function Home() {
             <div className="lg:col-span-5 flex flex-col items-center">
               <div className="relative w-72 h-80 bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden shadow-2xl group">
                 <Image
-                  src="/assets/avatar-kades.svg"
+                  src={kadesInfo.foto}
                   alt="Kepala Desa Tempursari"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="text-center mt-4">
-                <h4 className="font-extrabold text-lg text-slate-800">Hajah aina</h4>
+                <h4 className="font-extrabold text-lg text-slate-800">{kadesInfo.nama}</h4>
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Kepala Desa Tempursari</p>
               </div>
             </div>
