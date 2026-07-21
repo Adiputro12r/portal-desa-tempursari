@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 import Link from "next/link";
-import Image from "next/image";
+import ImageWithLoading from "@/components/ui/ImageWithLoading";
 import { Newspaper, Calendar, ArrowRight, User, Search, BookOpen } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { memoryCache } from "@/lib/memoryCache";
@@ -135,11 +135,12 @@ export default function KabarDesa() {
                   className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col group hover:-translate-y-1 transition-all duration-300"
                 >
                   <div className="relative h-52 bg-slate-100 overflow-hidden">
-                    <Image
+                    <ImageWithLoading
                       src={coverImg}
                       alt={berita.judul}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      skeletonText="Memuat foto..."
                     />
                     <div className="absolute top-4 left-4 bg-emerald-600 text-white font-extrabold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
                       {berita.kategori}

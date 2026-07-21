@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import Image from "next/image";
+import ImageWithLoading from "@/components/ui/ImageWithLoading";
 import { ShoppingBag, Compass, MapPin, MessageSquare, ExternalLink, Music, Calendar } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { memoryCache } from "@/lib/memoryCache";
@@ -126,7 +126,7 @@ export default function UmkmWisata() {
             return (
               <div key={umkm.id} className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col sm:flex-row group hover:border-emerald-500/20 hover:-translate-y-1 transition-all duration-300">
                 <div className="relative w-full sm:w-48 h-48 sm:h-auto shrink-0 bg-slate-50">
-                  <Image src={coverImg} alt={umkm.nama_usaha} fill className="object-cover group-hover:scale-103 transition-transform duration-500" />
+                  <ImageWithLoading src={coverImg} alt={umkm.nama_usaha} fill className="object-cover group-hover:scale-103 transition-transform duration-500" skeletonText="Memuat foto..." />
                   <div className="absolute top-4 left-4 bg-amber-500 text-white font-extrabold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">UMKM Lokal</div>
                 </div>
                 <div className="p-6 flex-grow flex flex-col justify-between space-y-4">
@@ -154,7 +154,7 @@ export default function UmkmWisata() {
             return (
               <div key={wisata.id} className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col sm:flex-row group hover:border-emerald-500/20 hover:-translate-y-1 transition-all duration-300">
                 <div className="relative w-full sm:w-48 h-48 sm:h-auto shrink-0 bg-slate-50">
-                  <Image src={coverImg} alt={wisata.nama_wisata} fill className="object-cover group-hover:scale-103 transition-transform duration-500" />
+                  <ImageWithLoading src={coverImg} alt={wisata.nama_wisata} fill className="object-cover group-hover:scale-103 transition-transform duration-500" skeletonText="Memuat foto..." />
                   <div className="absolute top-4 left-4 bg-emerald-600 text-white font-extrabold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">Objek Wisata</div>
                 </div>
                 <div className="p-6 flex-grow flex flex-col justify-between space-y-4">

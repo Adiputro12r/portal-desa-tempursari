@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from "react";
 
 import Link from "next/link";
-import Image from "next/image";
+import ImageWithLoading from "@/components/ui/ImageWithLoading";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Calendar, User, ChevronRight, Share2, Check, ChevronLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -25,7 +25,7 @@ function ImageGallery({ images }) {
   if (images.length === 1) {
     return (
       <div className="relative h-64 sm:h-[400px] w-full rounded-2xl overflow-hidden bg-slate-50 border border-slate-100">
-        <Image src={images[0]} alt="Foto artikel" fill className="object-cover" priority />
+        <ImageWithLoading src={images[0]} alt="Foto artikel" fill className="object-cover" priority skeletonText="Memuat foto..." />
       </div>
     );
   }
@@ -34,7 +34,7 @@ function ImageGallery({ images }) {
     <div className="space-y-3">
       {/* Main image */}
       <div className="relative h-64 sm:h-[400px] w-full rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 group">
-        <Image src={images[current]} alt={`Foto ${current + 1}`} fill className="object-cover transition-all duration-500" priority />
+        <ImageWithLoading src={images[current]} alt={`Foto ${current + 1}`} fill className="object-cover transition-all duration-500" priority skeletonText="Memuat foto..." />
         {/* Prev / Next */}
         <button
           onClick={() => setCurrent(c => (c - 1 + images.length) % images.length)}
@@ -63,7 +63,7 @@ function ImageGallery({ images }) {
               idx === current ? "border-emerald-500 shadow-md" : "border-slate-200 opacity-60 hover:opacity-100"
             }`}
           >
-            <Image src={src} alt={`Thumb ${idx + 1}`} fill className="object-cover" />
+            <ImageWithLoading src={src} alt={`Thumb ${idx + 1}`} fill className="object-cover" skeletonText="..." />
           </button>
         ))}
       </div>

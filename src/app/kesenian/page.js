@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import Image from "next/image";
+import ImageWithLoading from "@/components/ui/ImageWithLoading";
 import { Music, Calendar, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { memoryCache } from "@/lib/memoryCache";
@@ -95,7 +95,7 @@ export default function KesenianDaerah() {
             return (
               <div key={seni.id} className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col group hover:-translate-y-1.5 transition-all duration-300">
                 <div className="relative h-64 sm:h-72 bg-slate-100 overflow-hidden">
-                  <Image src={coverImg} alt={seni.nama_kesenian} fill className="object-cover group-hover:scale-103 transition-transform duration-500" />
+                  <ImageWithLoading src={coverImg} alt={seni.nama_kesenian} fill className="object-cover group-hover:scale-103 transition-transform duration-500" skeletonText="Memuat foto..." />
                   <div className="absolute top-4 left-4 bg-amber-500 text-white font-extrabold text-[9px] uppercase tracking-widest px-3 py-1.5 rounded-xl flex items-center space-x-1.5">
                     <Music className="w-3.5 h-3.5" />
                     <span>Seni Tradisional</span>

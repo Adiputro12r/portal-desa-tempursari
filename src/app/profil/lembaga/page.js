@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-import Image from "next/image";
+import ImageWithLoading from "@/components/ui/ImageWithLoading";
 import { Landmark, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -100,11 +99,12 @@ export default function LembagaDesa() {
                 {/* Photo */}
                 {img && (
                   <div className="relative w-full" style={{ aspectRatio: img.startsWith("data:image/svg") ? "16/7" : "16/9", maxHeight: "480px", overflow: "hidden" }}>
-                    <Image
+                    <ImageWithLoading
                       src={img}
                       alt={section.nama_lembaga || "Lembaga Desa"}
                       fill
                       className="object-contain bg-slate-50"
+                      skeletonText="Memuat foto..."
                     />
                   </div>
                 )}

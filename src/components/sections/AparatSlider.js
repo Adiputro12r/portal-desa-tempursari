@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import ImageWithLoading from "@/components/ui/ImageWithLoading";
 import { memoryCache } from "@/lib/memoryCache";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight, Phone, MessageSquare } from "lucide-react";
 import { aparatData as defaultAparatData } from "@/data/aparatData";
 import ModalPhone from "@/components/ui/ModalPhone";
@@ -145,12 +145,12 @@ export default function AparatSlider() {
             >
               {/* Photo Cover Section (Full Rectangle) */}
               <div className="relative h-72 w-full bg-slate-100 overflow-hidden">
-                <Image
+                <ImageWithLoading
                   src={aparat.foto}
                   alt={aparat.nama}
                   fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                  skeletonText="Memuat foto..."
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-60" />
               </div>
