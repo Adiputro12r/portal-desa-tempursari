@@ -3,8 +3,9 @@
  *
  * Fetch data UMKM dan Wisata dari Supabase di server secara paralel.
  * Pass ke UmkmWisataClient yang handle tab switching (butuh interaktivitas).
+ * `force-dynamic` → render fresh setiap request, perubahan Supabase langsung tampil.
  */
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 import { fetchUmkm, fetchWisata } from "@/lib/fetchData";
 import UmkmWisataClient from "@/components/sections/UmkmWisataClient";

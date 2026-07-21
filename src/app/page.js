@@ -5,9 +5,10 @@
  * HTML yang dikirim ke browser sudah berisi data asli dari Supabase —
  * tidak ada dummy data, tidak ada loading state untuk konten utama.
  *
- * `revalidate = 60` → Next.js cache halaman ini 60 detik di server (ISR).
+ * `force-dynamic` → render di server setiap request (no ISR cache).
+ * Perubahan data Supabase langsung tampil tanpa delay.
  */
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 import Link from "next/link";
 import ImageWithLoading from "@/components/ui/ImageWithLoading";

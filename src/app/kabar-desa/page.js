@@ -3,8 +3,9 @@
  *
  * Fetch semua artikel dari Supabase di server.
  * Pass data ke KabarDesaClient yang handle search & filter (butuh interaktivitas).
+ * `force-dynamic` → render fresh setiap request, perubahan Supabase langsung tampil.
  */
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 import { fetchArtikel } from "@/lib/fetchData";
 import KabarDesaClient from "@/components/sections/KabarDesaClient";
