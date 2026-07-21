@@ -21,23 +21,8 @@ function parseFirstImage(foto_url) {
   return foto_url;
 }
 
-function SectionSkeleton() {
-  return (
-    <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden animate-pulse space-y-0">
-      <div className="h-72 bg-slate-200" />
-      <div className="p-8 space-y-4">
-        <div className="h-6 bg-slate-200 rounded w-1/2" />
-        <div className="h-3 bg-slate-100 rounded w-full" />
-        <div className="h-3 bg-slate-100 rounded w-5/6" />
-        <div className="h-3 bg-slate-100 rounded w-4/5" />
-      </div>
-    </div>
-  );
-}
-
 export default function LembagaDesa() {
-  const [sections, setSections] = useState(() => memoryCache[CACHE_KEY] || []);
-  const [loading, setLoading] = useState(() => !memoryCache[CACHE_KEY]);
+  const [sections, setSections] = useState(() => memoryCache[CACHE_KEY] || fallback);
 
   useEffect(() => {
     document.title = "Lembaga Desa - Portal Desa Tempursari";
@@ -48,7 +33,6 @@ export default function LembagaDesa() {
         const { data, timestamp } = JSON.parse(cached);
         if (data?.length > 0) {
           setSections(data);
-          setLoading(false);
           if (Date.now() - timestamp < CACHE_TTL) {
             memoryCache[CACHE_KEY] = data;
             return;
@@ -75,8 +59,6 @@ export default function LembagaDesa() {
       } catch (_) {
         setSections(prev => prev.length > 0 ? prev : fallback);
         memoryCache[CACHE_KEY] = fallback;
-      } finally {
-        setLoading(false);
       }
     };
     fetchData();
@@ -106,10 +88,8 @@ export default function LembagaDesa() {
 
       {/* Content Sections */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-        {loading ? (
-          [1, 2].map(i => <SectionSkeleton key={i} />)
-        ) : (
-          sections.map((section, idx) => {
+        <div className="space-y-8">
+          {sections.map((section, idx) => {
             const img = parseFirstImage(section.foto_url || section.logo_url);
             const content = section.deskripsi || section.konten || "";
             const isHtml = content.includes("<");
@@ -150,8 +130,8 @@ export default function LembagaDesa() {
                 </div>
               </div>
             );
-          })
-        )}
+          })}
+        </div>
       </div>
     </div>
   );

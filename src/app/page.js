@@ -14,10 +14,9 @@ const KADES_CACHE_KEY = "kades_info_cache";
 const KADES_CACHE_TTL = 5 * 60 * 1000; // 5 menit
 
 export default function Home() {
-  const [kadesInfo, setKadesInfo] = useState(() => memoryCache[KADES_CACHE_KEY] || null);
+  const [kadesInfo, setKadesInfo] = useState(() => memoryCache[KADES_CACHE_KEY] || { nama: "Loading...", foto: "/assets/avatar-kades.svg" });
   const [kadesLoaded, setKadesLoaded] = useState(() => !!memoryCache[KADES_CACHE_KEY]);
-  const [recentArticles, setRecentArticles] = useState(() => memoryCache["recent_articles"] || []);
-  const [loadingArticles, setLoadingArticles] = useState(() => !memoryCache["recent_articles"]);
+  const [recentArticles, setRecentArticles] = useState(() => memoryCache["recent_articles"] || beritaData.slice(0, 3));
 
   useEffect(() => {
     // Step 1: Load from cache instantly
@@ -81,8 +80,6 @@ export default function Home() {
       } catch (err) {
         setRecentArticles(beritaData.slice(0, 3));
         memoryCache["recent_articles"] = beritaData.slice(0, 3);
-      } finally {
-        setLoadingArticles(false);
       }
     };
     fetchArticles();
@@ -219,24 +216,11 @@ export default function Home() {
 
           {/* Grid Content */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {loadingArticles ? (
-              [1, 2, 3].map((n) => (
-                <div key={n} className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col animate-pulse">
-                  <div className="h-48 bg-slate-200" />
-                  <div className="p-6 space-y-3">
-                    <div className="h-3 bg-slate-200 rounded w-1/3" />
-                    <div className="h-5 bg-slate-200 rounded w-full" />
-                    <div className="h-4 bg-slate-100 rounded w-full" />
-                    <div className="h-4 bg-slate-100 rounded w-4/5" />
-                  </div>
-                </div>
-              ))
-            ) : (
-              recentArticles.map((artikel) => (
-                <div
-                  key={artikel.id}
-                  className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col group hover:-translate-y-1 transition-all duration-300"
-                >
+            {recentArticles.map((artikel) => (
+              <div
+                key={artikel.id}
+                className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col group hover:-translate-y-1 transition-all duration-300"
+              >
                 {/* Cover Image */}
                 <div className="relative h-48 bg-slate-100 overflow-hidden">
                   <Image
@@ -274,7 +258,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-            )))}
+            ))}
           </div>
 
         </div>

@@ -21,24 +21,8 @@ function parseFirstImage(foto_url) {
   return foto_url;
 }
 
-function BeritaSkeleton() {
-  return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden flex flex-col animate-pulse">
-      <div className="h-52 bg-slate-200" />
-      <div className="p-6 space-y-3">
-        <div className="h-3 bg-slate-200 rounded w-1/2" />
-        <div className="h-5 bg-slate-200 rounded w-full" />
-        <div className="h-5 bg-slate-200 rounded w-3/4" />
-        <div className="h-3 bg-slate-100 rounded w-full" />
-        <div className="h-3 bg-slate-100 rounded w-5/6" />
-      </div>
-    </div>
-  );
-}
-
 export default function KabarDesa() {
-  const [beritaList, setBeritaList] = useState(() => memoryCache[CACHE_KEY] || []);
-  const [loading, setLoading] = useState(() => !memoryCache[CACHE_KEY]);
+  const [beritaList, setBeritaList] = useState(() => memoryCache[CACHE_KEY] || fallbackData);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
 
@@ -52,7 +36,6 @@ export default function KabarDesa() {
         const { data, timestamp } = JSON.parse(cached);
         if (data?.length > 0) {
           setBeritaList(data);
-          setLoading(false);
           if (Date.now() - timestamp < CACHE_TTL) {
             memoryCache[CACHE_KEY] = data;
             return;
@@ -80,8 +63,6 @@ export default function KabarDesa() {
       } catch (_) {
         setBeritaList(prev => prev.length > 0 ? prev : fallbackData);
         memoryCache[CACHE_KEY] = fallbackData;
-      } finally {
-        setLoading(false);
       }
     };
     fetch();
@@ -143,11 +124,7 @@ export default function KabarDesa() {
 
       {/* Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map(i => <BeritaSkeleton key={i} />)}
-          </div>
-        ) : filtered.length > 0 ? (
+        {filtered.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {filtered.map((berita) => {
               const coverImg = parseFirstImage(berita.foto_url);
