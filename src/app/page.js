@@ -5,10 +5,9 @@
  * HTML yang dikirim ke browser sudah berisi data asli dari Supabase —
  * tidak ada dummy data, tidak ada loading state untuk konten utama.
  *
- * `force-dynamic` → render di server setiap request (no ISR cache).
- * Perubahan data Supabase langsung tampil tanpa delay.
+ * `revalidate = 60` → ISR Cache 60 detik di server. Halaman dimuat INSTAN (0s)!
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 import Link from "next/link";
 import ImageWithLoading from "@/components/ui/ImageWithLoading";

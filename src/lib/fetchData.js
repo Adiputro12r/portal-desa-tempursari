@@ -59,12 +59,17 @@ export async function fetchAparat() {
 /**
  * Fetch artikel/berita dari Supabase.
  * @param {number|null} limit - Jumlah artikel. null = semua.
+ * @param {boolean} includeContent - Apakah perlu menyertakan konten lengkap (default: false untuk menghemat ukuran cache)
  */
-export async function fetchArtikel(limit = null) {
+export async function fetchArtikel(limit = null, includeContent = false) {
   try {
+    const fields = includeContent
+      ? "*"
+      : "id, judul, kategori, foto_url, tanggal, author, created_at";
+
     let query = supabaseServer
       .from("artikel")
-      .select("*")
+      .select(fields)
       .order("created_at", { ascending: false });
 
     if (limit) query = query.limit(limit);

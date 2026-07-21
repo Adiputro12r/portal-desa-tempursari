@@ -3,9 +3,9 @@
  *
  * Fetch data UMKM dan Wisata dari Supabase di server secara paralel.
  * Pass ke UmkmWisataClient yang handle tab switching (butuh interaktivitas).
- * `force-dynamic` → render fresh setiap request, perubahan Supabase langsung tampil.
+ * `revalidate = 60` → ISR Cache 60 detik di server. Halaman dimuat INSTAN (0s)!
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 import { fetchUmkm, fetchWisata } from "@/lib/fetchData";
 import UmkmWisataClient from "@/components/sections/UmkmWisataClient";
