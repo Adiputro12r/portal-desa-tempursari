@@ -21,7 +21,16 @@ export default function AparatSlider() {
           .select("*");
 
         if (!error && data && data.length > 0) {
-          const formatted = data.map((item) => ({
+          // Sort so Kepala Desa is always first (far left)
+          const sorted = [...data].sort((a, b) => {
+            const isKadesA = a.jabatan?.toLowerCase().includes("kepala desa") || a.jabatan?.toLowerCase() === "kades";
+            const isKadesB = b.jabatan?.toLowerCase().includes("kepala desa") || b.jabatan?.toLowerCase() === "kades";
+            if (isKadesA && !isKadesB) return -1;
+            if (!isKadesA && isKadesB) return 1;
+            return (a.urutan ?? 0) - (b.urutan ?? 0);
+          });
+
+          const formatted = sorted.map((item) => ({
             ...item,
             foto: item.foto_url || item.foto || "/assets/avatar-kades.svg",
             hasWhatsapp: item.hasWhatsapp ?? (item.kontak ? item.kontak.startsWith("+") : true),
