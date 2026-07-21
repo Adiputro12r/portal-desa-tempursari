@@ -10,7 +10,7 @@ import { beritaData } from "@/data/beritaData";
 import { supabase } from "@/lib/supabase";
 import { memoryCache } from "@/lib/memoryCache";
 
-const KADES_CACHE_KEY = "kades_info_cache";
+const KADES_CACHE_KEY = "kades_info_cache_v2";
 const KADES_CACHE_TTL = 5 * 60 * 1000; // 5 menit
 
 function initFromCache(cacheKey, fallback) {
@@ -18,7 +18,7 @@ function initFromCache(cacheKey, fallback) {
 }
 
 export default function Home() {
-  const [kadesInfo, setKadesInfo] = useState(() => initFromCache(KADES_CACHE_KEY, { nama: "Hajah aina", foto: "/assets/avatar-kades.svg" }));
+  const [kadesInfo, setKadesInfo] = useState(() => initFromCache(KADES_CACHE_KEY, { nama: "Hajah aina", foto: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600" }));
   const [kadesLoaded, setKadesLoaded] = useState(() => !!memoryCache[KADES_CACHE_KEY]);
   const [recentArticles, setRecentArticles] = useState(() => initFromCache("recent_articles", null) || beritaData.slice(0, 3));
 
@@ -48,16 +48,16 @@ export default function Home() {
         if (data && data.length > 0) {
           const info = {
             nama: data[0].nama || "Hajah aina",
-            foto: data[0].foto_url || "/assets/avatar-kades.svg",
+            foto: data[0].foto_url || "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600",
           };
           setKadesInfo(info);
           memoryCache[KADES_CACHE_KEY] = info;
           localStorage.setItem(KADES_CACHE_KEY, JSON.stringify({ data: info, timestamp: Date.now() }));
         } else if (!kadesLoaded) {
-          setKadesInfo({ nama: "Hajah aina", foto: "/assets/avatar-kades.svg" });
+          setKadesInfo({ nama: "Hajah aina", foto: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600" });
         }
       } catch (err) {
-        if (!kadesLoaded) setKadesInfo({ nama: "Hajah aina", foto: "/assets/avatar-kades.svg" });
+        if (!kadesLoaded) setKadesInfo({ nama: "Hajah aina", foto: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600" });
       } finally {
         setKadesLoaded(true);
       }
@@ -79,12 +79,6 @@ export default function Home() {
         }
       } catch (err) {
         setRecentArticles(beritaData.slice(0, 3));
-<<<<<<< HEAD
-        memoryCache["recent_articles"] = beritaData.slice(0, 3);
-=======
-      } finally {
-        setLoadingArticles(false);
->>>>>>> parent of 67ccd1e (fix: cache fallback data to prevent recurring shimmer on empty db)
       }
     };
     fetchArticles();

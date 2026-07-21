@@ -5,7 +5,7 @@ export const aparatData = [
     jabatan: "Kepala Desa",
     hasWhatsapp: true,
     kontak: "+6281234567890",
-    foto: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600",
+    foto: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600",
     deskripsi: "Memimpin penyelenggaraan pemerintahan, pembangunan, pembinaan, dan pemberdayaan masyarakat Desa Tempursari."
   },
   {

@@ -61,12 +61,8 @@ export default function KabarDesa() {
         }
       } catch (_) {
         setBeritaList(prev => prev.length > 0 ? prev : fallbackData);
-<<<<<<< HEAD
-        memoryCache[CACHE_KEY] = fallbackData;
-=======
       } finally {
         setLoading(false);
->>>>>>> parent of 67ccd1e (fix: cache fallback data to prevent recurring shimmer on empty db)
       }
     };
     fetch();

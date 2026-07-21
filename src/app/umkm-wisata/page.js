@@ -50,12 +50,8 @@ async function fetchWithCache(cacheKey, supabaseTable, fallback, setter) {
     }
   } catch (_) {
     setter(prev => prev?.length > 0 ? prev : fallback);
-<<<<<<< HEAD
-    memoryCache[cacheKey] = fallback;
-=======
   } finally {
     setLoading && setLoading(false);
->>>>>>> parent of 67ccd1e (fix: cache fallback data to prevent recurring shimmer on empty db)
   }
 }
 

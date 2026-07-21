@@ -8,7 +8,7 @@ import { aparatData as defaultAparatData } from "@/data/aparatData";
 import ModalPhone from "@/components/ui/ModalPhone";
 import { supabase } from "@/lib/supabase";
 
-const CACHE_KEY = "aparat_desa_cache";
+const CACHE_KEY = "aparat_desa_cache_v2";
 const CACHE_TTL = 5 * 60 * 1000; // 5 menit
 
 function sortAparat(data) {
@@ -62,12 +62,6 @@ export default function AparatSlider() {
         }
       } catch (err) {
         setAparatList(prev => prev.length > 0 ? prev : defaultAparatData);
-<<<<<<< HEAD
-        memoryCache[CACHE_KEY] = defaultAparatData;
-=======
-      } finally {
-        setLoading(false);
->>>>>>> parent of 67ccd1e (fix: cache fallback data to prevent recurring shimmer on empty db)
       }
     };
 

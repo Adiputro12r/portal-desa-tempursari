@@ -57,12 +57,8 @@ export default function LembagaDesa() {
         }
       } catch (_) {
         setSections(prev => prev.length > 0 ? prev : fallback);
-<<<<<<< HEAD
-        memoryCache[CACHE_KEY] = fallback;
-=======
       } finally {
         setLoading(false);
->>>>>>> parent of 67ccd1e (fix: cache fallback data to prevent recurring shimmer on empty db)
       }
     };
     fetchData();

@@ -54,12 +54,8 @@ export default function KesenianDaerah() {
         }
       } catch (_) {
         setKesenianList(prev => prev.length > 0 ? prev : fallbackKesenian);
-<<<<<<< HEAD
-        memoryCache[CACHE_KEY] = fallbackKesenian;
-=======
       } finally {
         setLoading(false);
->>>>>>> parent of 67ccd1e (fix: cache fallback data to prevent recurring shimmer on empty db)
       }
     };
     fetchData();
