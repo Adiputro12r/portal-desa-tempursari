@@ -85,9 +85,11 @@ export default function Home() {
         } else {
           setRecentArticles(beritaData.slice(0, 3));
           memoryCache["recent_articles"] = beritaData.slice(0, 3);
+          localStorage.setItem("recent_articles", JSON.stringify({ data: beritaData.slice(0, 3), timestamp: Date.now() }));
         }
       } catch (err) {
         setRecentArticles(beritaData.slice(0, 3));
+        memoryCache["recent_articles"] = beritaData.slice(0, 3);
       } finally {
         setLoadingArticles(false);
       }

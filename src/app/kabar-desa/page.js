@@ -74,9 +74,12 @@ export default function KabarDesa() {
           localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         } else {
           setBeritaList(prev => prev.length > 0 ? prev : fallbackData);
+          memoryCache[CACHE_KEY] = fallbackData;
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ data: fallbackData, timestamp: Date.now() }));
         }
       } catch (_) {
         setBeritaList(prev => prev.length > 0 ? prev : fallbackData);
+        memoryCache[CACHE_KEY] = fallbackData;
       } finally {
         setLoading(false);
       }
