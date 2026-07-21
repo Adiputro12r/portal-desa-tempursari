@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LoadingScreen from "@/components/ui/LoadingScreen";
+import DataPrefetcher from "@/components/layout/DataPrefetcher";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -35,6 +36,10 @@ export default function RootLayout({ children }) {
 
         {/* Footer with credit watermark */}
         <Footer />
+
+        {/* Background data prefetcher — fetch semua data Supabase ke cache
+            agar navigasi antar halaman tidak perlu loading ulang */}
+        <DataPrefetcher />
       </body>
     </html>
   );
