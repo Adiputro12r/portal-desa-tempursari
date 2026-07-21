@@ -11,13 +11,8 @@ export default function Navbar() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const pathname = usePathname();
 
-  // Hide Navbar on Admin and Login pages
-  if (pathname && (pathname.startsWith("/admin") || pathname === "/login")) {
-    return null;
-  }
-
-
   // Listen to scroll to adjust navbar background opacity
+  // (hooks must always be called before any early returns)
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
@@ -30,6 +25,11 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Hide Navbar on Admin and Login pages (after all hooks)
+  if (pathname && (pathname.startsWith("/admin") || pathname === "/login")) {
+    return null;
+  }
 
   const navLinks = [
     { name: "DESA TEMPURSARI", href: "/" },

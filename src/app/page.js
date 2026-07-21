@@ -61,7 +61,7 @@ export default function Home() {
                 />
               </div>
               <div className="text-center mt-4">
-                <h4 className="font-extrabold text-lg text-slate-800">H. Joko Susilo, S.P.</h4>
+                <h4 className="font-extrabold text-lg text-slate-800">Hajah aina</h4>
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Kepala Desa Tempursari</p>
               </div>
             </div>
