@@ -51,12 +51,15 @@ export default function KesenianDaerah() {
           localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         } else {
           setKesenianList(prev => prev.length > 0 ? prev : fallbackKesenian);
-          memoryCache[CACHE_KEY] = fallbackKesenian;
-          localStorage.setItem(CACHE_KEY, JSON.stringify({ data: fallbackKesenian, timestamp: Date.now() }));
         }
       } catch (_) {
         setKesenianList(prev => prev.length > 0 ? prev : fallbackKesenian);
+<<<<<<< HEAD
         memoryCache[CACHE_KEY] = fallbackKesenian;
+=======
+      } finally {
+        setLoading(false);
+>>>>>>> parent of 67ccd1e (fix: cache fallback data to prevent recurring shimmer on empty db)
       }
     };
     fetchData();

@@ -76,11 +76,15 @@ export default function Home() {
         } else {
           setRecentArticles(beritaData.slice(0, 3));
           memoryCache["recent_articles"] = beritaData.slice(0, 3);
-          localStorage.setItem("recent_articles", JSON.stringify({ data: beritaData.slice(0, 3), timestamp: Date.now() }));
         }
       } catch (err) {
         setRecentArticles(beritaData.slice(0, 3));
+<<<<<<< HEAD
         memoryCache["recent_articles"] = beritaData.slice(0, 3);
+=======
+      } finally {
+        setLoadingArticles(false);
+>>>>>>> parent of 67ccd1e (fix: cache fallback data to prevent recurring shimmer on empty db)
       }
     };
     fetchArticles();

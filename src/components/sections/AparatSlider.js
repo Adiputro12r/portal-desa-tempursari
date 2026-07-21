@@ -59,12 +59,15 @@ export default function AparatSlider() {
           localStorage.setItem(CACHE_KEY, JSON.stringify({ data: formatted, timestamp: Date.now() }));
         } else {
           setAparatList(prev => prev.length > 0 ? prev : defaultAparatData);
-          memoryCache[CACHE_KEY] = defaultAparatData;
-          localStorage.setItem(CACHE_KEY, JSON.stringify({ data: defaultAparatData, timestamp: Date.now() }));
         }
-      } catch (_) {
+      } catch (err) {
         setAparatList(prev => prev.length > 0 ? prev : defaultAparatData);
+<<<<<<< HEAD
         memoryCache[CACHE_KEY] = defaultAparatData;
+=======
+      } finally {
+        setLoading(false);
+>>>>>>> parent of 67ccd1e (fix: cache fallback data to prevent recurring shimmer on empty db)
       }
     };
 
