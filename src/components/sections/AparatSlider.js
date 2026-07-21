@@ -27,35 +27,19 @@ function sortAparat(data) {
 
 export default function AparatSlider() {
   const scrollContainerRef = useRef(null);
-  const [aparatList, setAparatList] = useState(() => {
-    // Coba dari memory cache dulu (antar-navigasi SPA)
-    if (memoryCache[CACHE_KEY]) return memoryCache[CACHE_KEY];
-    // Lalu coba localStorage (setelah refresh, baca langsung tanpa delay)
-    if (typeof window !== "undefined") {
-      try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const { data } = JSON.parse(cached);
-          if (data?.length > 0) return data;
-        }
-      } catch (_) {}
-    }
-    // Fallback ke data bawaan
-    return defaultAparatData;
-  });
+  const [aparatList, setAparatList] = useState(() => memoryCache[CACHE_KEY] || defaultAparatData);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAparat, setSelectedAparat] = useState(null);
 
   useEffect(() => {
-    // Baca localStorage sudah dilakukan di useState initializer.
-    // Cek apakah cache masih fresh, jika ya skip fetch.
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
-        if (data?.length > 0 && Date.now() - timestamp < CACHE_TTL) {
+        if (data?.length > 0) {
+          setAparatList(data);
           memoryCache[CACHE_KEY] = data;
-          return; // Cache masih fresh, skip fetch ke Supabase
+          if (Date.now() - timestamp < CACHE_TTL) return;
         }
       }
     } catch (_) {}

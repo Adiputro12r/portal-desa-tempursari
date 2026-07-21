@@ -14,16 +14,7 @@ const KADES_CACHE_KEY = "kades_info_cache";
 const KADES_CACHE_TTL = 5 * 60 * 1000; // 5 menit
 
 function initFromCache(cacheKey, fallback) {
-  if (memoryCache[cacheKey]) return memoryCache[cacheKey];
-  if (typeof window === "undefined") return fallback; // SSR guard
-  try {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { data } = JSON.parse(cached);
-      if (data) return data;
-    }
-  } catch (_) {}
-  return fallback;
+  return memoryCache[cacheKey] || fallback;
 }
 
 export default function Home() {
@@ -32,14 +23,15 @@ export default function Home() {
   const [recentArticles, setRecentArticles] = useState(() => initFromCache("recent_articles", null) || beritaData.slice(0, 3));
 
   useEffect(() => {
-    // localStorage sudah dibaca di initializer, cek freshness saja
     try {
       const cached = localStorage.getItem(KADES_CACHE_KEY);
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
-        if (data && Date.now() - timestamp < KADES_CACHE_TTL) {
+        if (data) {
+          setKadesInfo(data);
+          setKadesLoaded(true);
           memoryCache[KADES_CACHE_KEY] = data;
-          return; // Cache masih fresh
+          if (Date.now() - timestamp < KADES_CACHE_TTL) return;
         }
       }
     } catch (_) {}

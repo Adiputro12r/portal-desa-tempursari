@@ -22,27 +22,18 @@ function parseFirstImage(foto_url) {
 }
 
 function initFromCache(cacheKey, fallback) {
-  if (memoryCache[cacheKey]) return memoryCache[cacheKey];
-  if (typeof window === "undefined") return fallback; // SSR guard
-  try {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { data } = JSON.parse(cached);
-      if (data?.length > 0) return data;
-    }
-  } catch (_) {}
-  return fallback;
+  return memoryCache[cacheKey] || fallback;
 }
 
 async function fetchWithCache(cacheKey, supabaseTable, fallback, setter) {
-  // Cek freshness cache saja (data sudah di-init oleh initFromCache)
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, timestamp } = JSON.parse(cached);
-      if (data?.length > 0 && Date.now() - timestamp < CACHE_TTL) {
+      if (data?.length > 0) {
+        setter(data);
         memoryCache[cacheKey] = data;
-        return; // Cache fresh, skip Supabase
+        if (Date.now() - timestamp < CACHE_TTL) return;
       }
     }
   } catch (_) {}

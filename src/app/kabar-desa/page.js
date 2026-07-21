@@ -22,16 +22,7 @@ function parseFirstImage(foto_url) {
 }
 
 function initFromCache(cacheKey, fallback) {
-  if (memoryCache[cacheKey]) return memoryCache[cacheKey];
-  if (typeof window === "undefined") return fallback; // SSR guard
-  try {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { data } = JSON.parse(cached);
-      if (data?.length > 0) return data;
-    }
-  } catch (_) {}
-  return fallback;
+  return memoryCache[cacheKey] || fallback;
 }
 
 export default function KabarDesa() {
@@ -42,14 +33,14 @@ export default function KabarDesa() {
   useEffect(() => {
     document.title = "Kabar Desa - Portal Desa Tempursari";
 
-    // localStorage sudah dibaca di initializer, cek freshness saja
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
-        if (data?.length > 0 && Date.now() - timestamp < CACHE_TTL) {
+        if (data?.length > 0) {
+          setBeritaList(data);
           memoryCache[CACHE_KEY] = data;
-          return; // Cache masih fresh, skip fetch
+          if (Date.now() - timestamp < CACHE_TTL) return;
         }
       }
     } catch (_) {}
