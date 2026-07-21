@@ -225,7 +225,7 @@ export default function DetailBerita({ params }) {
                   return (
                     <Link key={rec.id} href={`/kabar-desa/${rec.id}`} className="flex space-x-4 items-start group">
                       <div className="relative w-20 h-20 bg-slate-100 rounded-xl overflow-hidden shrink-0 border border-slate-100">
-                        <Image src={recImg} alt={rec.judul} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <ImageWithLoading src={recImg} alt={rec.judul} fill className="object-cover group-hover:scale-105 transition-transform duration-300" skeletonText="..." />
                       </div>
                       <div className="space-y-1.5 min-w-0">
                         <h4 className="font-extrabold text-xs text-slate-800 tracking-tight leading-snug line-clamp-2 group-hover:text-emerald-700 transition-colors">
