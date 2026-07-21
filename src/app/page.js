@@ -11,12 +11,21 @@ import { memoryCache } from "@/lib/memoryCache";
 
 const KADES_CACHE_KEY = "kades_info_cache";
 const KADES_CACHE_TTL = 5 * 60 * 1000; // 5 menit
+const DEFAULT_KADES = {
+  nama: "Hajah aina",
+  foto: "/assets/avatar-kades.svg",
+};
 
 export default function Home() {
-  const [kadesInfo, setKadesInfo] = useState(() => memoryCache[KADES_CACHE_KEY] || null);
-  const [kadesLoaded, setKadesLoaded] = useState(() => !!memoryCache[KADES_CACHE_KEY]);
-  const [recentArticles, setRecentArticles] = useState(() => memoryCache["recent_articles"] || []);
-  const [loadingArticles, setLoadingArticles] = useState(() => !memoryCache["recent_articles"]);
+  const [kadesInfo, setKadesInfo] = useState(
+    () => memoryCache[KADES_CACHE_KEY] || DEFAULT_KADES
+  );
+  const [recentArticles, setRecentArticles] = useState(
+    () => memoryCache["recent_articles"] || []
+  );
+  const [loadingArticles, setLoadingArticles] = useState(
+    () => !memoryCache["recent_articles"]
+  );
 
   useEffect(() => {
     // Step 1: Load from cache instantly
@@ -26,9 +35,8 @@ export default function Home() {
         const { data, timestamp } = JSON.parse(cached);
         if (data) {
           setKadesInfo(data);
-          setKadesLoaded(true);
+          memoryCache[KADES_CACHE_KEY] = data;
           if (Date.now() - timestamp < KADES_CACHE_TTL) {
-            memoryCache[KADES_CACHE_KEY] = data;
             return;
           }
         }
@@ -40,26 +48,28 @@ export default function Home() {
       try {
         const { data } = await supabase
           .from("pemerintah_desa")
-          .select("*")
-          .ilike("jabatan", "%Kepala Desa%")
-          .limit(1);
+          .select("*");
 
         if (data && data.length > 0) {
+          const kadesRow =
+            data.find(
+              (d) =>
+                d.jabatan?.toLowerCase().includes("kepala desa") ||
+                d.jabatan?.toLowerCase() === "kades"
+            ) || data[0];
+
           const info = {
-            nama: data[0].nama || "Hajah aina",
-            foto: data[0].foto_url || "/assets/avatar-kades.svg",
+            nama: kadesRow.nama || DEFAULT_KADES.nama,
+            foto: kadesRow.foto_url || kadesRow.foto || DEFAULT_KADES.foto,
           };
           setKadesInfo(info);
           memoryCache[KADES_CACHE_KEY] = info;
-          localStorage.setItem(KADES_CACHE_KEY, JSON.stringify({ data: info, timestamp: Date.now() }));
-        } else if (!kadesLoaded) {
-          setKadesInfo({ nama: "Hajah aina", foto: "/assets/avatar-kades.svg" });
+          localStorage.setItem(
+            KADES_CACHE_KEY,
+            JSON.stringify({ data: info, timestamp: Date.now() })
+          );
         }
-      } catch (err) {
-        if (!kadesLoaded) setKadesInfo({ nama: "Hajah aina", foto: "/assets/avatar-kades.svg" });
-      } finally {
-        setKadesLoaded(true);
-      }
+      } catch (_) {}
     };
     // Step 3: Fetch Recent Articles
     const fetchArticles = async () => {
@@ -82,6 +92,7 @@ export default function Home() {
         setLoadingArticles(false);
       }
     };
+    fetchKades();
     fetchArticles();
   }, []);
 
