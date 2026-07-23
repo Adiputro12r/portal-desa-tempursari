@@ -2,7 +2,6 @@
  * fetchData.js — Centralized data fetcher untuk Server Components.
  *
  * Semua fungsi di sini berjalan di server (Node.js environment).
- * Tidak ada `useState`, `useEffect`, atau browser APIs di sini.
  * Setiap fungsi mengembalikan data asli dari Supabase, atau fallback
  * statis jika Supabase error / data kosong.
  */
@@ -12,7 +11,7 @@ import { aparatData as fallbackAparat } from "@/data/aparatData";
 import { beritaData as fallbackBerita } from "@/data/beritaData";
 import { umkmData as fallbackUmkm, wisataData as fallbackWisata } from "@/data/umkmWisataData";
 
-// ─── Helper ─────────────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function sortAparat(data) {
   return [...data]
@@ -35,6 +34,15 @@ function sortAparat(data) {
     }));
 }
 
+function parseFirstImage(foto_url, fallback = "/assets/kesenian-placeholder.svg") {
+  if (!foto_url) return fallback;
+  try {
+    const arr = JSON.parse(foto_url);
+    if (Array.isArray(arr) && arr.length > 0) return arr[0];
+  } catch (_) {}
+  return foto_url;
+}
+
 // ─── Fetchers ────────────────────────────────────────────────────────────────
 
 /**
@@ -54,20 +62,6 @@ export async function fetchAparat() {
   } catch (_) {
     return sortAparat(fallbackAparat);
   }
-}
-
-/**
- * Helper untuk membersihkan foto_url yang berupa Base64 raksasa di server prerender
- * agar ukuran HTML Next.js tidak membengkak dari KB jadi MB.
- */
-function sanitizePhotoUrl(url, fallback) {
-  if (!url) return fallback;
-  // Jika foto_url adalah string Base64 raksasa (> 2000 karakter),
-  // pakai fallback/placeholder untuk Server HTML prerender
-  if (url.startsWith("data:image/") && url.length > 2000) {
-    return fallback;
-  }
-  return url;
 }
 
 /**
@@ -93,7 +87,7 @@ export async function fetchArtikel(limit = null, includeContent = false) {
     if (!error && data && data.length > 0) {
       return data.map((item) => ({
         ...item,
-        foto_url: sanitizePhotoUrl(item.foto_url, "/assets/kesenian-placeholder.svg"),
+        foto_url: parseFirstImage(item.foto_url),
       }));
     }
     return limit ? fallbackBerita.slice(0, limit) : fallbackBerita;
@@ -107,7 +101,7 @@ export async function fetchArtikel(limit = null, includeContent = false) {
  * Mengembalikan object { nama, foto } atau fallback.
  */
 export async function fetchKades() {
-  const defaultFoto = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600";
+  const fallbackFoto = "/assets/avatar-kades.svg";
   try {
     const { data, error } = await supabaseServer
       .from("pemerintah_desa")
@@ -116,16 +110,17 @@ export async function fetchKades() {
       .limit(1);
 
     if (!error && data && data.length > 0) {
+      const kades = data[0];
       return {
-        nama: data[0].nama || "Hajah aina",
-        foto: sanitizePhotoUrl(data[0].foto_url, defaultFoto),
+        nama: kades.nama || "Surip Al Suripto",
+        foto: parseFirstImage(kades.foto_url || kades.foto, fallbackFoto),
       };
     }
   } catch (_) {}
 
   return {
-    nama: "Hajah aina",
-    foto: defaultFoto,
+    nama: "Surip Al Suripto",
+    foto: fallbackFoto,
   };
 }
 

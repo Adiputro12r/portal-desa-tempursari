@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import ImageWithLoading from "@/components/ui/ImageWithLoading";
+import SkeletonCard from "@/components/ui/SkeletonCard";
 import { Newspaper, Calendar, Search, BookOpen } from "lucide-react";
 import { memoryCache } from "@/lib/memoryCache";
 
@@ -17,16 +18,10 @@ function parseFirstImage(foto_url) {
   return foto_url;
 }
 
-/**
- * KabarDesaClient — komponen interaktif untuk halaman Kabar Desa.
- * Menerima `initialData` dari Server Component parent-nya.
- * Data tidak perlu di-fetch ulang di sini; sudah tersedia dari server.
- */
 export default function KabarDesaClient({ initialData = [] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
 
-  // Simpan ke memoryCache supaya halaman lain bisa pakai tanpa fetch
   if (initialData.length > 0 && !memoryCache[CACHE_KEY]) {
     memoryCache[CACHE_KEY] = initialData;
   }
@@ -92,7 +87,9 @@ export default function KabarDesaClient({ initialData = [] }) {
 
       {/* Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {filtered.length > 0 ? (
+        {initialData.length === 0 ? (
+          <SkeletonCard count={6} />
+        ) : filtered.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {filtered.map((berita) => {
               const coverImg = parseFirstImage(berita.foto_url);
