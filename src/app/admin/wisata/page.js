@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Trash2, Edit3, Save, X, Compass, MapPin, Upload } from "lucide-react";
+import { Plus, Trash2, Edit3, Save, X, Compass, MapPin, Upload, Loader2 } from "lucide-react";
 import { wisataData as initialDummyWisata } from "@/data/umkmWisataData";
+import { uploadToSupabase } from "@/lib/storage";
 
 export default function ManageWisata() {
   const [wisataList, setWisataList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [usingDummy, setUsingDummy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   
   // Form Modal States
   const [modalOpen, setModalOpen] = useState(false);
@@ -19,14 +21,18 @@ export default function ManageWisata() {
   const [lokasi, setLokasi] = useState("");
   const [mapsUrl, setMapsUrl] = useState("");
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setFotoUrl(event.target?.result || "");
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    setUploading(true);
+    const { url, error } = await uploadToSupabase(file, "wisata");
+    setUploading(false);
+
+    if (error) {
+      alert("Gagal mengunggah foto: " + error.message);
+    } else if (url) {
+      setFotoUrl(url);
     }
   };
 

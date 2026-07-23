@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Trash2, Edit3, Save, X, Sparkles, Calendar, Upload } from "lucide-react";
+import { Plus, Trash2, Edit3, Save, X, Sparkles, Calendar, Upload, Loader2 } from "lucide-react";
 import { kesenianData as initialDummyKesenian } from "@/data/umkmWisataData";
+import { uploadToSupabase } from "@/lib/storage";
 
 export default function ManageKesenian() {
   const [kesenianList, setKesenianList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [usingDummy, setUsingDummy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   
   // Form Modal States
   const [modalOpen, setModalOpen] = useState(false);
@@ -18,14 +20,18 @@ export default function ManageKesenian() {
   const [fotoUrl, setFotoUrl] = useState("");
   const [jadwalKegiatan, setJadwalKegiatan] = useState("");
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setFotoUrl(event.target?.result || "");
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    setUploading(true);
+    const { url, error } = await uploadToSupabase(file, "kesenian");
+    setUploading(false);
+
+    if (error) {
+      alert("Gagal mengunggah foto: " + error.message);
+    } else if (url) {
+      setFotoUrl(url);
     }
   };
 

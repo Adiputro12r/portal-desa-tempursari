@@ -1,35 +1,46 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
-import { Upload, X, ImagePlus } from "lucide-react";
+import { Upload, X, ImagePlus, Loader2 } from "lucide-react";
+import { uploadToSupabase } from "@/lib/storage";
 
 const MAX_IMAGES = 5;
-const MAX_SIZE_MB = 2;
+const MAX_SIZE_MB = 5;
 
-export default function MultiImageUpload({ images = [], onChange, label = "Foto" }) {
+export default function MultiImageUpload({ images = [], onChange, label = "Foto", folder = "berita" }) {
   const inputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleFiles = (e) => {
+  const handleFiles = async (e) => {
     const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
     const remaining = MAX_IMAGES - images.length;
     const toProcess = files.slice(0, remaining);
 
-    toProcess.forEach((file) => {
+    setUploading(true);
+    const newUploadedUrls = [];
+
+    for (const file of toProcess) {
       if (file.size > MAX_SIZE_MB * 1024 * 1024) {
         alert(`File "${file.name}" melebihi batas ${MAX_SIZE_MB}MB.`);
-        return;
+        continue;
       }
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const dataUri = ev.target?.result;
-        if (dataUri) {
-          onChange([...images, dataUri]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
 
+      const { url, error } = await uploadToSupabase(file, folder);
+      if (error) {
+        alert(`Gagal mengunggah ${file.name}: ${error.message}`);
+      } else if (url) {
+        newUploadedUrls.push(url);
+      }
+    }
+
+    if (newUploadedUrls.length > 0) {
+      onChange([...images, ...newUploadedUrls]);
+    }
+
+    setUploading(false);
     // reset input so same file can be re-selected
     e.target.value = "";
   };
@@ -105,14 +116,24 @@ export default function MultiImageUpload({ images = [], onChange, label = "Foto"
       {images.length < MAX_IMAGES && (
         <button
           type="button"
+          disabled={uploading}
           onClick={() => inputRef.current?.click()}
-          className="w-full flex flex-col items-center justify-center gap-2 py-6 border-2 border-dashed border-slate-200 rounded-xl hover:border-emerald-400 hover:bg-emerald-50/50 transition-all text-slate-400 hover:text-emerald-600"
+          className="w-full flex flex-col items-center justify-center gap-2 py-6 border-2 border-dashed border-slate-200 rounded-xl hover:border-emerald-400 hover:bg-emerald-50/50 transition-all text-slate-400 hover:text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <ImagePlus className="w-8 h-8" />
-          <span className="text-xs font-bold">
-            Klik untuk pilih gambar ({MAX_IMAGES - images.length} slot tersisa)
-          </span>
-          <span className="text-[10px]">PNG, JPG, WEBP · Maks {MAX_SIZE_MB}MB</span>
+          {uploading ? (
+            <>
+              <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+              <span className="text-xs font-bold text-emerald-600">Mengunggah ke Supabase Storage...</span>
+            </>
+          ) : (
+            <>
+              <ImagePlus className="w-8 h-8" />
+              <span className="text-xs font-bold">
+                Klik untuk pilih gambar ({MAX_IMAGES - images.length} slot tersisa)
+              </span>
+              <span className="text-[10px]">PNG, JPG, WEBP · Maks {MAX_SIZE_MB}MB</span>
+            </>
+          )}
         </button>
       )}
 

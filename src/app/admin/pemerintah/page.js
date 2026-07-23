@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Trash2, Edit3, Save, X, Users, Phone, MessageSquare, Upload } from "lucide-react";
+import { Plus, Trash2, Edit3, Save, X, Users, Phone, MessageSquare, Upload, Loader2 } from "lucide-react";
 import { aparatData as initialDummyAparat } from "@/data/aparatData";
+import { uploadToSupabase } from "@/lib/storage";
 
 export default function ManagePemerintah() {
   const [aparatList, setAparatList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [usingDummy, setUsingDummy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   
   // Form Modal States
   const [modalOpen, setModalOpen] = useState(false);
@@ -20,14 +22,18 @@ export default function ManagePemerintah() {
   const [hasWhatsapp, setHasWhatsapp] = useState(true);
   const [deskripsi, setDeskripsi] = useState("");
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setFotoUrl(event.target?.result || "");
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    setUploading(true);
+    const { url, error } = await uploadToSupabase(file, "pemerintah");
+    setUploading(false);
+
+    if (error) {
+      alert("Gagal mengunggah foto: " + error.message);
+    } else if (url) {
+      setFotoUrl(url);
     }
   };
 
@@ -292,12 +298,22 @@ export default function ManagePemerintah() {
                   <div className="flex items-center space-x-2">
                     <label className="flex-1 cursor-pointer bg-slate-50 hover:bg-emerald-50/50 border border-dashed border-emerald-500/40 rounded-xl px-3 py-2 text-center transition-colors">
                       <span className="text-xs font-bold text-emerald-700 flex items-center justify-center space-x-1">
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>Upload SVG/Foto...</span>
+                        {uploading ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Mengunggah...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-3.5 h-3.5" />
+                            <span>Upload SVG/Foto...</span>
+                          </>
+                        )}
                       </span>
                       <input
                         type="file"
                         accept="image/*,.svg"
+                        disabled={uploading}
                         onChange={handleFileChange}
                         className="hidden"
                       />
